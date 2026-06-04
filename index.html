@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX DETAIL — Luxury Car Detailing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #faf6f0;
+  --bg-2:      #f2ece2;
+  --bg-3:      #e8e0d4;
+  --bg-4:      #dfd6c8;
+  --gold:      #b8924a;
+  --gold-lt:   #d4aa6e;
+  --gold-dim:  rgba(184,146,74,0.10);
+  --gold-bdr:  rgba(184,146,74,0.28);
+  --text:      #1c1810;
+  --muted:     #6b6058;
+  --dim:       #aaa098;
+  --white:     #ffffff;
+  --card-bg:   #fdfaf6;
+  --ease:      cubic-bezier(0.16,1,0.3,1);
+  --font-d:    'Cinzel', serif;
+  --font-s:    'Cormorant Garamond', serif;
+  --font-b:    'DM Sans', sans-serif;
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-b);
+  font-weight:300;
+  line-height:1.6;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* Grain */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:0.025;
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* Cursor */
+.cursor {
+  width:10px; height:10px;
+  border:1px solid var(--gold);
+  border-radius:50%;
+  position:fixed; pointer-events:none;
+  z-index:10000;
+  transform:translate(-50%,-50%);
+  transition:width .25s var(--ease),height .25s var(--ease),background .25s;
+}
+.cursor-ring {
+  width:36px; height:36px;
+  border:1px solid rgba(184,146,74,.3);
+  border-radius:50%;
+  position:fixed; pointer-events:none;
+  z-index:9999;
+  transform:translate(-50%,-50%);
+}
+.cursor.hov { width:5px; height:5px; background:var(--gold); }
+.cursor-ring.hov { width:52px; height:52px; border-color:var(--gold); }
+
+/* Reveal */
+.reveal,.reveal-l,.reveal-r {
+  opacity:0;
+  transition:opacity 8s var(--ease),transform 8s var(--ease);
+}
+.reveal      { transform:translateY(28px); }
+.reveal-l    { transform:translateX(-36px); }
+.reveal-r    { transform:translateX(36px); }
+.reveal.in, .reveal-l.in, .reveal-r.in { opacity:1; transform:none; }
+.d1{transition-delay:.08s} .d2{transition-delay:.18s} .d3{transition-delay:.28s}
+.d4{transition-delay:.38s} .d5{transition-delay:.48s}
+
+/* Pricing card reveal — slow luxury cascade */
+.svc-card.reveal {
+  opacity:0;
+  transform:translateY(36px);
+  transition:opacity 15s var(--ease),transform 15s var(--ease);
+}
+.svc-card.reveal.in { opacity:1; transform:none; }
+.svc-card.d1 { transition-delay:0.1s; }
+.svc-card.d2 { transition-delay:0.5s; }
+.svc-card.d3 { transition-delay:1s; }
+.svc-card.d4 { transition-delay:1.5s; }
+
+/* Custom job card reveal */
+.svc-custom.reveal {
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity 15s var(--ease),transform 15s var(--ease);
+  transition-delay:0.8s;
+}
+.svc-custom.reveal.in { opacity:1; transform:none; }
+
+/* ── NAV ─────────────────────────────────── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  padding:28px 64px;
+  display:flex; align-items:center; justify-content:space-between;
+  transition:background .4s,padding .4s,border-color .4s,box-shadow .4s;
+  border-bottom:1px solid transparent;
+}
+nav.stuck {
+  background:rgba(250,246,240,.95);
+  backdrop-filter:blur(18px);
+  padding:16px 64px;
+  border-bottom-color:var(--gold-bdr);
+  box-shadow:0 2px 24px rgba(28,24,16,.06);
+}
+.nav-logo {
+  font-family:var(--font-d); font-size:.9rem; font-weight:600;
+  letter-spacing:.32em; color:var(--gold); text-decoration:none;
+}
+.nav-logo span { color:var(--text); font-weight:400; }
+.nav-links { display:flex; gap:40px; list-style:none; }
+.nav-links a {
+  font-size:.65rem; font-weight:400; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--muted); text-decoration:none;
+  transition:color .3s;
+}
+.nav-links a:hover { color:var(--gold); }
+.nav-cta {
+  font-size:.65rem; font-weight:500; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--white); background:var(--gold);
+  padding:12px 28px; text-decoration:none;
+  transition:background .3s,transform .3s var(--ease);
+}
+.nav-cta:hover { background:var(--gold-lt); transform:translateY(-1px); }
+.nav-ham { display:none; flex-direction:column; gap:5px; cursor:pointer; }
+.nav-ham span { width:22px; height:1px; background:var(--text); transition:all .3s; }
+
+/* Mobile overlay */
+.mob-nav {
+  position:fixed; inset:0;
+  background:rgba(250,246,240,.98);
+  z-index:998; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:44px;
+  opacity:0; pointer-events:none; transition:opacity .4s;
+}
+.mob-nav.open { opacity:1; pointer-events:all; }
+.mob-nav a {
+  font-family:var(--font-d); font-size:2.2rem; font-weight:400;
+  letter-spacing:.08em; color:var(--muted); text-decoration:none;
+  transition:color .3s;
+}
+.mob-nav a:hover { color:var(--gold); }
+.mob-close {
+  position:absolute; top:28px; right:32px;
+  font-size:1.4rem; color:var(--gold);
+  background:none; border:none; cursor:pointer;
+}
+
+/* ── HERO ─────────────────────────────────── */
+.hero {
+  position:relative; height:100vh; min-height:680px;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+/* Ken Burns on hero — one-shot luxury zoom on load */
+.hero-bg-image {
+  position:absolute;
+  top:-5%; left:-5%;
+  width:110%; height:110%;
+  object-fit:cover;
+  object-position:center 40%;
+  z-index:0;
+  animation:luxuryZoom 12s ease-out forwards;
+  transform-origin:center center;
+}
+@keyframes luxuryZoom {
+  0%   { transform:scale(1.0); }
+  100% { transform:scale(1.05); }
+}
+.hero-bg {
+  position:absolute; inset:0; z-index:1;
+  background:
+    radial-gradient(ellipse 55% 55% at 68% 58%, rgba(184,146,74,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 55% at 28% 38%, rgba(184,146,74,.04) 0%, transparent 55%),
+    linear-gradient(rgba(28,24,16,.52), rgba(28,24,16,.52)),
+    linear-gradient(155deg,rgba(250,246,240,.55) 0%,rgba(245,239,229,.38) 50%,rgba(240,234,216,.46) 100%);
+}
+.hero-vline {
+  position:absolute; left:14%; top:0; width:1px; height:100%;
+  background:linear-gradient(to bottom,transparent,rgba(184,146,74,.15),transparent);
+}
+.hero-hline {
+  position:absolute; bottom:26%; left:0; right:0; height:1px;
+  background:linear-gradient(to right,transparent,rgba(184,146,74,.1),transparent);
+}
+
+.hero-content {
+  position:relative; z-index:2;
+  text-align:center; max-width:920px; padding:0 24px;
+}
+.hero-eye {
+  font-size:.6rem; font-weight:600; letter-spacing:.72em;
+  text-transform:uppercase; color:#fff;
+  display:flex; align-items:center; justify-content:center; gap:18px;
+  margin-bottom:34px;
+  opacity:0; animation:luxuryFadeUp 3.8s cubic-bezier(0.16,1,0.3,1) 0.4s forwards;
+}
+.hero-eye::before,.hero-eye::after {
+  content:''; width:36px; height:1px; background:#fff; opacity:.7;
+}
+.hero-title {
+  font-family:var(--font-d);
+  font-size:clamp(3.8rem,8.5vw,8rem);
+  font-weight:400; line-height:.92; letter-spacing:-.01em;
+  color:var(--text); margin-bottom:30px;
+  opacity:0; animation:luxuryFadeUp 4.0s cubic-bezier(0.16,1,0.3,1) 1.0s forwards;
+}
+.hero-title em { font-style:normal; color:var(--gold); font-weight:600; }
+.hero-sub {
+  font-family:var(--font-s); font-size:clamp(1rem,2vw,1.3rem);
+  font-weight:400; font-style:italic; color:rgba(255,255,255,.82);
+  max-width:520px; margin:0 auto 56px; line-height:1.65;
+  text-shadow:0 1px 12px rgba(0,0,0,.45);
+  opacity:0; animation:luxuryFadeUp 4.2s cubic-bezier(0.16,1,0.3,1) 1.8s forwards;
+}
+.hero-btns {
+  display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
+  opacity:0; animation:luxuryFadeUp 4.4s cubic-bezier(0.16,1,0.3,1) 2.4s forwards;
+}
+
+.btn-gold {
+  font-size:.68rem; font-weight:500; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--white); background:var(--gold);
+  padding:17px 50px; text-decoration:none; display:inline-block;
+  position:relative; overflow:hidden;
+  transition:background .3s,transform .3s var(--ease);
+}
+.btn-gold::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  transform:translateX(-100%); transition:transform .55s;
+}
+.btn-gold:hover::after { transform:translateX(100%); }
+.btn-gold:hover { background:var(--gold-lt); transform:translateY(-2px); }
+
+.btn-ghost {
+  font-size:.68rem; font-weight:500; letter-spacing:.2em;
+  text-transform:uppercase; color:#fff; background:rgba(255,255,255,.08);
+  padding:17px 50px; text-decoration:none; display:inline-block;
+  border:1px solid rgba(255,255,255,.65);
+  transition:border-color .3s,background .3s,transform .3s var(--ease);
+}
+.btn-ghost:hover { border-color:#fff; background:rgba(255,255,255,.16); transform:translateY(-2px); }
+
+.hero-scroll {
+  position:absolute; bottom:38px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+  opacity:0; animation:fadeIn 8s ease 1.4s forwards;
+}
+.hero-scroll-txt {
+  font-size:.58rem; letter-spacing:.35em; text-transform:uppercase; color:var(--dim);
+}
+.hero-scroll-ln {
+  width:1px; height:56px;
+  background:linear-gradient(to bottom,var(--gold),transparent);
+  animation:pulse-ln 8s ease-in-out infinite;
+}
+@keyframes pulse-ln { 0%,100%{opacity:.3} 50%{opacity:.85} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(26px)} to{opacity:1;transform:none} }
+@keyframes luxuryFadeUp {
+  from { opacity:0; transform:translateY(28px); filter:blur(4px); }
+  to   { opacity:1; transform:none; filter:blur(0); }
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* ── SHARED ──────────────────────────────── */
+.container { max-width:1200px; margin:0 auto; padding:0 60px; }
+.lbl {
+  font-size:.58rem; font-weight:400; letter-spacing:.52em;
+  text-transform:uppercase; color:var(--gold);
+  display:flex; align-items:center; gap:14px; margin-bottom:18px;
+}
+.lbl::before { content:''; width:28px; height:1px; background:var(--gold); }
+.lbl.center { justify-content:center; }
+.lbl.center::before,.lbl.center::after { content:''; width:28px; height:1px; background:var(--gold); }
+.sec-h {
+  font-family:var(--font-d); font-size:clamp(2rem,4.5vw,3.4rem);
+  font-weight:400; line-height:1.08; color:var(--text); margin-bottom:22px;
+}
+.sec-p {
+  font-family:var(--font-s); font-size:1.05rem; font-weight:300;
+  font-style:italic; color:var(--muted); line-height:1.72;
+}
+
+/* ── STATS ────────────────────────────────── */
+.stats {
+  background:var(--bg-3);
+  border-top:1px solid var(--gold-bdr);
+  border-bottom:1px solid var(--gold-bdr);
+  padding:44px 0;
+}
+.stats-grid {
+  display:grid; grid-template-columns:repeat(4,1fr);
+}
+.stat {
+  text-align:center; padding:20px 16px;
+  border-right:1px solid var(--gold-bdr);
+}
+.stat:last-child { border-right:none; }
+.stat-n {
+  font-family:var(--font-d); font-size:2.4rem; font-weight:400;
+  color:var(--gold); line-height:1; margin-bottom:8px;
+}
+.stat-l {
+  font-size:.6rem; font-weight:300; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--muted);
+}
+
+/* ── SERVICES ─────────────────────────────── */
+.services { padding:140px 0; background:var(--bg-2); }
+.svc-head { text-align:center; margin-bottom:80px; }
+
+/* ── CARD STACK ───────────────────────────── */
+.svc-grid {
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:20px;
+}
+
+/* Card base */
+.svc-card {
+  background:var(--card-bg);
+  border:1px solid var(--gold-bdr);
+  border-radius:12px;
+  position:relative;
+  cursor:pointer;
+  perspective:1400px;
+  -webkit-perspective:1400px;
+}
+.svc-card.flipped { border-color:var(--gold); }
+.card-inner {
+  position:relative;
+  transform-style:preserve-3d;
+  -webkit-transform-style:preserve-3d;
+  transition:transform .85s cubic-bezier(0.4,0.2,0.2,1);
+  -webkit-transition:-webkit-transform .85s cubic-bezier(0.4,0.2,0.2,1);
+  min-height:520px;
+}
+.svc-card.flipped .card-inner {
+  transform:rotateY(180deg);
+  -webkit-transform:rotateY(180deg);
+}
+.card-front {
+  display:flex; flex-direction:column;
+  padding:32px 28px 28px; min-height:520px;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  overflow:hidden;
+}
+.card-front > div:last-child { margin-top:auto; padding-top:16px; }
+.card-back {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  transform:rotateY(180deg);
+  -webkit-transform:rotateY(180deg);
+  background:var(--text); border-radius:12px;
+  padding:36px 28px 32px;
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.card-back-label {
+  font-size:.55rem; font-weight:500; letter-spacing:.5em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:14px;
+}
+.card-back-title {
+  font-family:var(--font-d); font-size:1.55rem; font-weight:400;
+  color:#fff; margin-bottom:16px; line-height:1.15;
+}
+.card-back-body {
+  font-family:var(--font-s); font-size:.88rem; font-weight:300;
+  font-style:italic; color:rgba(250,246,240,.72);
+  line-height:1.8; flex:1; margin-bottom:26px;
+}
+.card-back-cta {
+  display:flex; align-items:center; justify-content:space-between;
+}
+.card-back-close {
+  font-size:.58rem; letter-spacing:.28em; text-transform:uppercase;
+  color:rgba(255,255,255,.38); cursor:pointer;
+  background:none; border:none; font-family:var(--font-b); padding:0;
+  transition:color .3s;
+}
+.card-back-close:hover { color:rgba(255,255,255,.75); }
+.card-flip-hint {
+  font-size:.55rem; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--gold); opacity:.55; margin-top:12px; display:block;
+  font-family:var(--font-b);
+}
+.bio-trigger-tag {
+  font-family:var(--font-b); font-size:.55rem; font-weight:500;
+  letter-spacing:.3em; text-transform:uppercase;
+  color:var(--gold); display:block; margin-bottom:5px;
+  opacity:.7; transition:opacity .2s;
+}
+.detailer-card:hover .bio-trigger-tag { opacity:1; }
+.svc-card-top {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  margin-bottom:20px;
+}
+.svc-card-title-block { flex:1; }
+.svc-card-img {
+  width:72px; height:72px;
+  flex-shrink:0; margin-left:12px;
+  transition:transform .35s cubic-bezier(0.34,1.56,0.64,1);
+  user-select:none; pointer-events:none;
+  overflow:visible;
+}
+.svc-card:hover .svc-card-img {
+  transform:scale(1.1) rotate(-4deg);
+}
+.svc-num {
+  font-family:var(--font-d); font-size:.58rem; font-weight:600;
+  letter-spacing:.32em; color:var(--gold); opacity:.55; margin-bottom:10px;
+  display:block;
+}
+.svc-name {
+  font-family:var(--font-d); font-size:.92rem; font-weight:400;
+  letter-spacing:.06em; color:var(--text); margin-bottom:6px;
+}
+.svc-price {
+  font-family:var(--font-d); font-size:1.7rem; font-weight:400;
+  color:var(--gold); line-height:1; margin-bottom:3px;
+}
+.svc-price-n {
+  font-size:.58rem; font-weight:300; color:var(--dim);
+  letter-spacing:.12em; text-transform:uppercase;
+}
+.svc-desc {
+  font-size:.78rem; font-weight:300; color:var(--muted);
+  line-height:1.72; margin-bottom:20px;
+}
+/* Diamond/sparkle feature list */
+.svc-feats { list-style:none; margin-bottom:28px; }
+.svc-feats li {
+  font-size:.72rem; font-weight:300; color:var(--muted);
+  padding:7px 0; border-bottom:1px solid rgba(28,24,16,.06);
+  display:flex; align-items:center; gap:10px;
+}
+.svc-feats li:last-child { border-bottom:none; }
+.feat-icon { flex-shrink:0; opacity:.75; }
+.svc-badge {
+  position:absolute; top:16px; right:16px;
+  font-size:.5rem; font-weight:500; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--white); background:var(--gold);
+  padding:4px 10px; border-radius:2px;
+}
+.svc-link {
+  font-size:.63rem; font-weight:400; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--gold); text-decoration:none;
+  display:flex; align-items:center; gap:9px; transition:gap .3s;
+  margin-top:auto;
+}
+.svc-link::after { content:'→'; transition:transform .3s; }
+.svc-link:hover { gap:14px; }
+.svc-link:hover::after { transform:translateX(3px); }
+
+/* Custom job card */
+.svc-custom {
+  background:var(--card-bg);
+  border:1px solid var(--gold-bdr);
+  border-radius:12px;
+  padding:40px 48px;
+  margin-top:20px;
+  display:flex; align-items:center; justify-content:space-between; gap:40px;
+  transition:border-color .3s, box-shadow .3s;
+}
+.svc-custom:hover {
+  border-color:var(--gold);
+  box-shadow:0 8px 28px rgba(28,24,16,.06);
+}
+.svc-custom-text h3 {
+  font-family:var(--font-d); font-size:1.15rem; font-weight:400;
+  letter-spacing:.06em; color:var(--text); margin-bottom:10px;
+}
+.svc-custom-text p {
+  font-family:var(--font-s); font-size:1rem; font-style:italic;
+  font-weight:300; color:var(--muted); max-width:580px; line-height:1.6;
+}
+.svc-custom-btn {
+  flex-shrink:0;
+  font-size:.65rem; font-weight:500; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--white); background:var(--gold);
+  padding:16px 36px; text-decoration:none;
+  transition:background .3s,transform .3s var(--ease);
+  white-space:nowrap;
+}
+.svc-custom-btn:hover { background:var(--gold-lt); transform:translateY(-2px); }
+
+/* ── WHY US ───────────────────────────────── */
+.why { padding:140px 0; background:var(--bg); }
+.why-inner {
+  display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:center;
+}
+.why-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:1px; background:var(--gold-bdr); border:1px solid var(--gold-bdr);
+}
+.why-card {
+  background:var(--bg); padding:44px 34px; transition:background .3s;
+}
+.why-card:hover { background:var(--bg-2); }
+.why-num {
+  font-family:var(--font-d); font-size:2.2rem; font-weight:400;
+  color:var(--gold); opacity:.22; line-height:1; margin-bottom:18px;
+  transition:opacity .3s;
+}
+.why-card:hover .why-num { opacity:.55; }
+.why-t {
+  font-family:var(--font-d); font-size:.82rem; font-weight:600;
+  letter-spacing:.08em; color:var(--text); margin-bottom:10px;
+}
+.why-p { font-size:.76rem; font-weight:300; color:var(--muted); line-height:1.72; }
+
+/* ── GALLERY ──────────────────────────────── */
+.gallery { padding:140px 0; background:var(--bg-2); overflow:hidden; }
+.gal-head { text-align:center; margin-bottom:72px; }
+.gal-grid {
+  display:grid;
+  grid-template-columns:1.45fr 1fr 1fr;
+  grid-template-rows:285px 205px;
+  gap:3px;
+}
+.gal-item {
+  position:relative; overflow:hidden;
+  outline:1px solid rgba(184,146,74,.18);
+  cursor:pointer;
+}
+.gal-item:nth-child(1) { grid-row:span 2; }
+.gal-img {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; transition:transform .85s var(--ease);
+  background-size:cover;
+  background-position:center;
+}
+.gal-item:hover .gal-img { transform:scale(1.06); }
+.gal-ov {
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(28,24,16,.72) 0%, rgba(28,24,16,.12) 50%, transparent 100%);
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end;
+  padding:26px; gap:6px;
+  opacity:0; transition:opacity .38s;
+}
+.gal-item:hover .gal-ov { opacity:1; }
+.gal-ov-lbl {
+  font-size:.62rem; letter-spacing:.28em; text-transform:uppercase; color:var(--gold);
+}
+.gal-ov-cta {
+  font-size:.55rem; letter-spacing:.32em; text-transform:uppercase;
+  color:rgba(255,255,255,.65); font-family:var(--font-b);
+}
+
+/* ── PORTFOLIO MODAL ──────────────────── */
+.portfolio-modal {
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  z-index:9999; opacity:0; pointer-events:none;
+  transition:opacity .4s cubic-bezier(0.16,1,0.3,1);
+}
+.portfolio-modal[aria-hidden="false"] { opacity:1; pointer-events:auto; }
+.modal-overlay {
+  position:absolute; inset:0;
+  background:rgba(10,8,6,.88);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.modal-window {
+  position:relative; width:90%; max-width:1060px; height:85vh;
+  background:#141210; border:1px solid rgba(184,146,74,.22);
+  border-radius:4px; z-index:10; overflow-y:auto;
+  transform:translateY(24px);
+  transition:transform .4s cubic-bezier(0.16,1,0.3,1);
+}
+.portfolio-modal[aria-hidden="false"] .modal-window { transform:translateY(0); }
+.modal-close-btn {
+  position:absolute; top:1.4rem; right:1.6rem;
+  background:none; border:none; color:#fff;
+  font-size:1rem; cursor:pointer; opacity:.45;
+  transition:opacity .2s; z-index:20;
+  font-family:var(--font-b); letter-spacing:.15em;
+}
+.modal-close-btn:hover { opacity:1; }
+.modal-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  height:100%; min-height:100%;
+}
+.modal-media-gallery {
+  padding:2rem; display:flex; flex-direction:column; gap:1rem;
+  background:#0a0806;
+}
+.main-media-container img {
+  width:100%; height:420px; object-fit:cover; border-radius:2px;
+  display:block;
+}
+.modal-content-panel {
+  padding:3rem 2.5rem;
+  display:flex; flex-direction:column; justify-content:center;
+  overflow-y:auto;
+}
+.modal-kicker {
+  font-family:var(--font-b); font-size:.58rem; font-weight:500;
+  letter-spacing:.5em; text-transform:uppercase; color:var(--gold);
+  margin-bottom:10px; display:block;
+}
+.modal-title {
+  font-family:var(--font-d); font-size:2.1rem; font-weight:400;
+  color:#fff; margin:0 0 1.4rem; line-height:1.1;
+}
+.modal-divider {
+  border:0; border-top:1px solid rgba(255,255,255,.08); margin-bottom:1.4rem;
+}
+.modal-story-section h3 {
+  font-family:var(--font-b); font-size:.55rem; font-weight:400;
+  letter-spacing:.42em; text-transform:uppercase;
+  color:rgba(255,255,255,.38); margin-bottom:.7rem;
+}
+.modal-story-section p {
+  font-family:var(--font-s); font-size:.92rem; font-weight:300;
+  font-style:italic; color:rgba(250,246,240,.72); line-height:1.8;
+}
+.modal-metrics-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.8rem 0;
+}
+.metric-card {
+  background:rgba(255,255,255,.03); padding:.9rem 1rem;
+  border-left:2px solid var(--gold);
+}
+.metric-label {
+  display:block; font-family:var(--font-b); font-size:.52rem;
+  font-weight:400; letter-spacing:.35em; text-transform:uppercase;
+  color:rgba(255,255,255,.35); margin-bottom:.3rem;
+}
+.metric-value {
+  display:block; font-family:var(--font-d);
+  font-size:1.05rem; font-weight:400; color:#fff;
+}
+.modal-quote {
+  border-left:2px solid rgba(184,146,74,.3);
+  padding-left:1.4rem; margin:1.4rem 0 0;
+}
+.modal-quote p {
+  font-family:var(--font-s); font-size:.9rem; font-weight:300;
+  font-style:italic; color:rgba(255,255,255,.8); line-height:1.75;
+  margin-bottom:.5rem;
+}
+.modal-quote cite {
+  font-family:var(--font-b); font-size:.58rem; letter-spacing:.2em;
+  color:var(--gold); font-style:normal; text-transform:uppercase;
+}
+@media(max-width:768px){
+  .modal-grid { grid-template-columns:1fr; height:auto; }
+  .modal-window { height:90vh; width:95%; }
+  .main-media-container img { height:220px; }
+  .modal-content-panel { padding:2rem 1.5rem; }
+}
+
+/* ── TESTIMONIALS ─────────────────────────── */
+.testi { padding:140px 0; background:var(--bg); }
+.testi-head { text-align:center; margin-bottom:72px; }
+.testi-carousel {
+  display:flex; align-items:center; gap:28px;
+  max-width:780px; margin:0 auto;
+}
+.testi-card {
+  flex:1; background:var(--bg); padding:56px 52px;
+  position:relative; border:1px solid var(--gold-bdr);
+  transition:opacity .24s ease, transform .24s ease;
+}
+.testi-card.fading { opacity:0; transform:translateY(10px); }
+.testi-stars { position:absolute; top:42px; right:42px; display:flex; gap:3px; }
+.star {
+  width:7px; height:7px; background:var(--gold); opacity:.8;
+  clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+}
+.testi-q {
+  font-family:var(--font-s); font-size:4.5rem; line-height:1;
+  color:var(--gold); opacity:.18; margin-bottom:-18px;
+}
+.testi-txt {
+  font-family:var(--font-s); font-size:1.04rem; font-weight:300;
+  font-style:italic; color:var(--text); line-height:1.78; margin-bottom:34px;
+}
+.testi-div { width:28px; height:1px; background:var(--gold); opacity:.55; margin-bottom:24px; }
+.testi-name {
+  font-family:var(--font-d); font-size:.72rem; font-weight:600;
+  letter-spacing:.1em; color:var(--text); margin-bottom:5px;
+}
+.testi-vehicle { font-size:.62rem; font-weight:300; color:var(--dim); letter-spacing:.1em; }
+.tcarr-arr {
+  flex-shrink:0; width:46px; height:46px; border-radius:50%;
+  border:1px solid var(--gold-bdr); background:transparent;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--gold);
+  transition:background .25s ease, border-color .25s ease;
+}
+.tcarr-arr:hover { background:var(--bg-2); border-color:var(--gold); }
+.tcarr-arr:active { transform:scale(.94); }
+.tcarr-arr svg { width:18px; height:18px; stroke:var(--gold); fill:none; stroke-width:1.5; }
+.tcarr-dots {
+  display:flex; justify-content:center; gap:10px; margin-top:42px;
+}
+.tcarr-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--gold); opacity:.25; cursor:pointer;
+  border:none; padding:0; transition:opacity .25s ease, transform .25s ease;
+}
+.tcarr-dot.active { opacity:.85; transform:scale(1.35); }
+
+/* ── CONTACT ──────────────────────────────── */
+.contact { padding:140px 0; background:var(--bg-2); }
+.contact-inner {
+  display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:start;
+}
+.contact-items { display:flex; flex-direction:column; gap:34px; margin-top:48px; }
+.ci-lbl {
+  font-size:.58rem; font-weight:400; letter-spacing:.42em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:7px;
+}
+.ci-val {
+  font-family:var(--font-s); font-size:1.04rem; font-weight:300;
+  color:var(--text); line-height:1.52;
+}
+
+/* Detailer card */
+.detailer-card {
+  display:flex; align-items:flex-start; gap:20px;
+  padding:22px 24px; background:var(--card-bg);
+  border:1px solid var(--gold-bdr); border-radius:10px;
+  margin-bottom:28px;
+}
+.detailer-avatar {
+  width:68px; height:68px; border-radius:50%;
+  object-fit:cover; object-position:center top; flex-shrink:0;
+  border:2px solid rgba(184,146,74,.35);
+}
+.detailer-name {
+  font-family:var(--font-d); font-size:.98rem; font-weight:400;
+  color:var(--text); margin-bottom:3px;
+}
+.detailer-title {
+  font-size:.52rem; font-weight:500; letter-spacing:.42em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:10px;
+}
+.detailer-quote {
+  font-family:var(--font-s); font-size:.84rem; font-weight:300;
+  font-style:italic; color:var(--muted); line-height:1.65;
+}
+.form-allocation {
+  font-size:.72rem; letter-spacing:.04em; color:var(--dim);
+  line-height:1.65; margin-bottom:30px;
+  border-left:2px solid var(--gold-bdr); padding-left:14px;
+}
+
+/* Form */
+.fg { margin-bottom:22px; }
+.fl {
+  font-size:.58rem; font-weight:400; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--dim);
+  display:block; margin-bottom:9px;
+}
+.fi,.fsel,.fta {
+  width:100%; background:transparent; border:none;
+  border-bottom:1px solid var(--bg-3);
+  color:var(--text); font-family:var(--font-b); font-size:.86rem;
+  font-weight:300; padding:11px 0; outline:none;
+  transition:border-color .3s; appearance:none;
+}
+.fi:focus,.fsel:focus,.fta:focus { border-bottom-color:var(--gold); }
+.fi::placeholder,.fta::placeholder { color:var(--dim); }
+.fsel option { background:var(--bg); color:var(--text); }
+.fta { resize:none; height:88px; }
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+.fsub {
+  width:100%; font-family:var(--font-b); font-size:.68rem; font-weight:500;
+  letter-spacing:.2em; text-transform:uppercase;
+  color:var(--white); background:var(--gold); border:none;
+  padding:19px; cursor:pointer; margin-top:14px;
+  position:relative; overflow:hidden;
+  transition:background .3s;
+}
+.fsub::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  transform:translateX(-100%); transition:transform .55s;
+}
+.fsub:hover::after { transform:translateX(100%); }
+.fsub:hover { background:var(--gold-lt); }
+
+/* ── FOOTER ───────────────────────────────── */
+footer {
+  background:var(--bg);
+  border-top:1px solid var(--gold-bdr);
+  padding:56px 0;
+}
+.foot-inner {
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:24px;
+}
+.foot-logo {
+  font-family:var(--font-d); font-size:.88rem; font-weight:600;
+  letter-spacing:.3em; color:var(--gold);
+}
+.foot-logo span { color:var(--muted); font-weight:400; }
+.foot-links { display:flex; gap:34px; list-style:none; }
+.foot-links a {
+  font-size:.62rem; font-weight:300; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--dim); text-decoration:none;
+  transition:color .3s;
+}
+.foot-links a:hover { color:var(--gold); }
+.foot-copy { font-size:.58rem; font-weight:300; color:var(--dim); letter-spacing:.1em; }
+
+/* ── SHOWCASE SLIDER ─────────────────────── */
+.showcase {
+  background:#0e0c0a;
+  position:relative;
+  overflow:hidden;
+}
+.showcase-slider {
+  position:relative;
+  height:70vh; min-height:440px; max-height:720px;
+  overflow:hidden;
+}
+.slide {
+  position:absolute; inset:0;
+  background-size:cover; background-position:center;
+  will-change:transform,opacity;
+}
+.slide::before {
+  content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(to top, rgba(10,8,6,.72) 0%, rgba(10,8,6,.22) 30%, transparent 55%),
+    linear-gradient(to bottom, rgba(10,8,6,.28) 0%, transparent 22%);
+}
+.slide-caption {
+  position:absolute; bottom:38px; left:64px; z-index:2;
+  display:flex; align-items:center; gap:14px;
+  font-size:.54rem; letter-spacing:.48em; text-transform:uppercase;
+  color:rgba(225,205,162,.65);
+}
+.slide-caption::before {
+  content:''; width:22px; height:1px; background:var(--gold); opacity:.6; flex-shrink:0;
+}
+/* ── Ken Burns — 18s cycle, ~6s each ─── */
+@keyframes kb-1 {
+  0%      { opacity:1; transform:scale(1.00) translate(0%,   0%);   }
+  33.3%   { opacity:1; transform:scale(1.07) translate(-1.2%,-0.6%); }
+  36.7%   { opacity:0; transform:scale(1.08); }
+  37%     {            transform:scale(1.00); }
+  100%    { opacity:0; transform:scale(1.00); }
+}
+@keyframes kb-2 {
+  0%,36.7%{ opacity:0; transform:scale(1.00) translate(0.9%, 0%);  }
+  40%     { opacity:1; }
+  66.7%   { opacity:1; transform:scale(1.06) translate(-0.4%,-0.8%); }
+  70%     { opacity:0; transform:scale(1.07); }
+  70.5%   {            transform:scale(1.00) translate(0.9%, 0%);  }
+  100%    { opacity:0; transform:scale(1.00) translate(0.9%, 0%);  }
+}
+@keyframes kb-3 {
+  0%,70%  { opacity:0; transform:scale(1.02) translate(0%,   0.5%); }
+  73.3%   { opacity:1; }
+  97%     { opacity:1; transform:scale(1.08) translate(-0.5%,-0.8%); }
+  100%    { opacity:0; transform:scale(1.09); }
+}
+.slide-1 { animation:kb-1 18s linear 0s infinite; }
+.slide-2 { animation:kb-2 18s linear 0s infinite; }
+.slide-3 { animation:kb-3 18s linear 0s infinite; }
+
+/* Progress dots */
+.slide-dots {
+  position:absolute; bottom:42px; right:64px;
+  display:flex; gap:10px; z-index:3;
+}
+.dot {
+  width:34px; height:2px;
+  background:rgba(225,205,162,.2);
+  position:relative; overflow:hidden;
+}
+.dot::after {
+  content:''; position:absolute; inset:0;
+  background:var(--gold); transform:translateX(-100%);
+  animation-duration:18s; animation-timing-function:linear; animation-iteration-count:infinite;
+}
+@keyframes dp-1 {
+  0%    { transform:translateX(-100%); }
+  33.3% { transform:translateX(0%);    }
+  36.7% { transform:translateX(100%);  }
+  37%   { transform:translateX(-100%); }
+  100%  { transform:translateX(-100%); }
+}
+@keyframes dp-2 {
+  0%,36.7% { transform:translateX(-100%); }
+  66.7%    { transform:translateX(0%);    }
+  70%      { transform:translateX(100%);  }
+  70.5%    { transform:translateX(-100%); }
+  100%     { transform:translateX(-100%); }
+}
+@keyframes dp-3 {
+  0%,70% { transform:translateX(-100%); }
+  100%   { transform:translateX(0%);    }
+}
+.dot-1::after { animation-name:dp-1; }
+.dot-2::after { animation-name:dp-2; }
+.dot-3::after { animation-name:dp-3; }
+
+@media(max-width:768px){
+  .showcase-slider { height:56vw; min-height:260px; }
+  .slide-caption  { left:24px; bottom:22px; font-size:.5rem; letter-spacing:.35em; }
+  .slide-dots     { right:24px; bottom:26px; }
+  .dot            { width:24px; }
+}
+
+/* ── RESPONSIVE ───────────────────────────── */
+@media(max-width:1200px){
+}
+@media(max-width:1024px){
+  .why-inner { gap:60px; }
+}
+@media(max-width:768px){
+  nav { padding:18px 24px; }
+  nav.stuck { padding:12px 24px; }
+  .nav-links,.nav-cta { display:none; }
+  .nav-ham { display:flex; }
+  .container { padding:0 24px; }
+  .services,.why,.gallery,.testi,.contact { padding:100px 0; }
+  .svc-grid { grid-template-columns:repeat(2, 1fr); }
+  .svc-custom { flex-direction:column; align-items:flex-start; gap:24px; padding:32px 28px; }
+  .why-inner { grid-template-columns:1fr; }
+  .why-grid { grid-template-columns:1fr 1fr; }
+  .gal-grid {
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:180px 180px 180px;
+  }
+  .gal-item:nth-child(1) { grid-row:span 1; }
+  .testi-grid { grid-template-columns:1fr; }
+  .contact-inner { grid-template-columns:1fr; gap:56px; }
+  .stats-grid { grid-template-columns:repeat(2,1fr); }
+  .stat:nth-child(2) { border-right:none; }
+  .stat:nth-child(3),.stat:nth-child(4) { border-top:1px solid var(--gold-bdr); }
+  .stat:nth-child(4) { border-right:none; }
+  .foot-inner { flex-direction:column; text-align:center; }
+  .foot-links { flex-wrap:wrap; justify-content:center; }
+  .frow { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursors -->
+<div class="cursor" id="cur"></div>
+<div class="cursor-ring" id="ring"></div>
+
+<!-- Mobile Nav -->
+<div class="mob-nav" id="mobNav">
+  <button class="mob-close" onclick="closeMob()">✕</button>
+  <a href="#services" onclick="closeMob()">Services</a>
+  <a href="#why" onclick="closeMob()">About</a>
+  <a href="#gallery" onclick="closeMob()">Gallery</a>
+  <a href="#testimonials" onclick="closeMob()">Reviews</a>
+  <a href="#contact" class="btn-gold" onclick="closeMob()" style="font-size:.68rem;letter-spacing:.2em;font-weight:500;text-transform:uppercase;cursor:none">Join Registry</a>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">APEX <span>DETAIL</span></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#why">About</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Join Registry</a>
+  <div class="nav-ham" onclick="openMob()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <img
+    class="hero-bg-image"
+    src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&auto=format&fit=crop&q=85"
+    alt=""
+    aria-hidden="true"
+  >
+  <div class="hero-bg"></div>
+  <div class="hero-vline"></div>
+  <div class="hero-hline"></div>
+  <div class="hero-content">
+    <p class="hero-eye">Luxury Car Detailing</p>
+    <h1 class="hero-title">Brought Back<br>to <em>Its Best.</em></h1>
+    <p class="hero-sub">Leave the mess. Pick up perfection.</p>
+    <div class="hero-btns">
+      <a href="#contact" class="btn-gold">Commission a Detail</a>
+      <a href="#services" class="btn-ghost">View Packages</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span class="hero-scroll-txt">Scroll</span>
+    <div class="hero-scroll-ln"></div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat reveal d1">
+        <div class="stat-n" data-count="2400">0</div>
+        <div class="stat-l">Vehicles Detailed</div>
+      </div>
+      <div class="stat reveal d2">
+        <div class="stat-n">12+</div>
+        <div class="stat-l">Years Experience</div>
+      </div>
+      <div class="stat reveal d3">
+        <div class="stat-n">100%</div>
+        <div class="stat-l">Satisfaction Rate</div>
+      </div>
+      <div class="stat reveal d4">
+        <div class="stat-n">4.9★</div>
+        <div class="stat-l">Average Rating</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHOWCASE SLIDER -->
+<section class="showcase">
+  <div class="showcase-slider">
+
+    <!-- Slide 1: Tight reflection on a freshly polished door panel -->
+    <div class="slide slide-1" style="background-image:url('https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1920&auto=format&fit=crop&q=85'); background-position:center 45%;">
+      <div class="slide-caption">Paint Reflection — Post Correction Detail</div>
+    </div>
+
+    <!-- Slide 2: Conditioned matte leather interior -->
+    <div class="slide slide-2" style="background-image:url('https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=1920&auto=format&fit=crop&q=85'); background-position:center 30%;">
+      <div class="slide-caption">Conditioned Leather — Interior Elite</div>
+    </div>
+
+    <!-- Slide 3: Supercar under immaculate studio lights -->
+    <div class="slide slide-3" style="background-image:url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1920&auto=format&fit=crop&q=85'); background-position:center 55%;">
+      <div class="slide-caption">Front Quarter — Full Concours Finish</div>
+    </div>
+
+    <div class="slide-dots">
+      <div class="dot dot-1"></div>
+      <div class="dot dot-2"></div>
+      <div class="dot dot-3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="container">
+    <div class="svc-head reveal">
+      <div class="lbl center">Our Packages</div>
+      <h2 class="sec-h">Four Packages.<br>No Corners Cut.</h2>
+      <p class="sec-p" style="max-width:480px;margin:0 auto">Each one is done by hand, start to finish. We use professional compounds because consumer products just don't cut it on cars that matter.</p>
+    </div>
+
+    <div class="svc-grid">
+
+      <!-- Card 1: Signature Wash -->
+      <div class="svc-card reveal d1">
+        <div class="card-inner">
+          <div class="card-front">
+            <div>
+          <div class="svc-card-top">
+            <div class="svc-card-title-block">
+              <span class="svc-num">01</span>
+              <div class="svc-name">Signature Wash</div>
+              <div class="svc-price">$89</div>
+              <div class="svc-price-n">Starting from</div>
+            </div>
+            <!-- Spray bottle -->
+            <svg class="svc-card-img" width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="sb-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#eeddb8"/><stop offset="100%" stop-color="#c8983e"/></linearGradient>
+                <linearGradient id="sb-trg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d4a855"/><stop offset="100%" stop-color="#a07430"/></linearGradient>
+              </defs>
+              <rect x="36" y="26" width="22" height="36" rx="5" fill="url(#sb-body)"/>
+              <rect x="52" y="26" width="6" height="36" rx="3" fill="#b8924a" opacity="0.28"/>
+              <rect x="42" y="14" width="8" height="14" rx="4" fill="#c8a050"/>
+              <rect x="38" y="10" width="16" height="8" rx="4" fill="#b8924a"/>
+              <path d="M36 38 C24 38 19 45 21 53 L28 53 C28 47 32 44 36 44 Z" fill="url(#sb-trg)"/>
+              <rect x="15" y="33" width="21" height="6" rx="3" fill="#b8924a"/>
+              <circle cx="13.5" cy="36" r="4" fill="#9a7430"/>
+              <rect x="37" y="36" width="20" height="3" rx="1.5" fill="#b8924a" opacity="0.3"/>
+              <circle cx="7" cy="30" r="2" fill="#b8924a" opacity="0.35"/>
+              <circle cx="5" cy="36" r="1.5" fill="#b8924a" opacity="0.28"/>
+              <circle cx="7" cy="42" r="2" fill="#b8924a" opacity="0.22"/>
+              <circle cx="4" cy="33" r="1" fill="#b8924a" opacity="0.18"/>
+              <circle cx="3.5" cy="39" r="1" fill="#b8924a" opacity="0.15"/>
+            </svg>
+          </div>
+          <p class="svc-desc">A thorough hand wash — two-bucket method, clay bar, dress the tyres, clean the glass. No pressure washer shortcuts.</p>
+          <ul class="svc-feats">
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Two-bucket hand wash
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Clay bar decontamination
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Wheel &amp; tyre care
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Interior wipe-down
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Streak-free glass finish
+            </li>
+          </ul>
+            </div>
+            <div>
+              <a href="#contact" class="svc-link">Book This</a>
+              <span class="card-flip-hint">Tap card for details →</span>
+            </div>
+          </div>
+          <div class="card-back">
+            <div>
+              <p class="card-back-label">What to Expect</p>
+              <h4 class="card-back-title">Two Hours.<br>No Shortcuts.</h4>
+              <p class="card-back-body">Pre-soak, foam bath, two-bucket hand wash — grit never touches your paint twice. Clay bar pulls brake dust, tar, and embedded fallout that washing alone leaves behind. Tyres dressed with a matte sealant. Glass cleaned streak-free inside and out. Roughly 2–3 hours on a standard car.</p>
+            </div>
+            <div class="card-back-cta">
+              <a href="#contact" class="btn-gold">Book This</a>
+              <button class="card-back-close">↩ Flip back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Interior Elite -->
+      <div class="svc-card reveal d2">
+        <div class="card-inner">
+          <div class="card-front">
+            <div>
+          <div class="svc-card-top">
+            <div class="svc-card-title-block">
+              <span class="svc-num">02</span>
+              <div class="svc-name">Interior Elite</div>
+              <div class="svc-price">$149</div>
+              <div class="svc-price-n">Starting from</div>
+            </div>
+            <!-- Microfiber cloth / detailing brush -->
+            <svg class="svc-card-img" width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="mf-cloth" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0e0bc"/><stop offset="100%" stop-color="#c89840"/></linearGradient>
+                <linearGradient id="mf-fold" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8cc90"/><stop offset="100%" stop-color="#b87e30"/></linearGradient>
+              </defs>
+              <!-- cloth base -->
+              <rect x="10" y="32" width="52" height="26" rx="6" fill="url(#mf-cloth)"/>
+              <!-- cloth fold shadow -->
+              <rect x="10" y="44" width="52" height="14" rx="4" fill="#b8924a" opacity="0.22"/>
+              <!-- fold crease -->
+              <rect x="10" y="32" width="52" height="14" rx="4" fill="url(#mf-fold)"/>
+              <!-- fold highlight line -->
+              <line x1="10" y1="44" x2="62" y2="44" stroke="#e8cc90" stroke-width="1.2" opacity="0.6"/>
+              <!-- texture lines on top fold -->
+              <line x1="18" y1="36" x2="54" y2="36" stroke="#b8924a" stroke-width="0.8" opacity="0.25"/>
+              <line x1="18" y1="39" x2="54" y2="39" stroke="#b8924a" stroke-width="0.8" opacity="0.25"/>
+              <line x1="18" y1="41.5" x2="54" y2="41.5" stroke="#b8924a" stroke-width="0.8" opacity="0.2"/>
+              <!-- texture lines on bottom fold -->
+              <line x1="18" y1="48" x2="54" y2="48" stroke="#b8924a" stroke-width="0.8" opacity="0.2"/>
+              <line x1="18" y1="51" x2="54" y2="51" stroke="#b8924a" stroke-width="0.8" opacity="0.2"/>
+              <line x1="18" y1="54" x2="54" y2="54" stroke="#b8924a" stroke-width="0.8" opacity="0.18"/>
+              <!-- corner fold -->
+              <path d="M56 32 L62 32 L62 38 Z" fill="#9a7430" opacity="0.5"/>
+              <!-- corner highlight -->
+              <circle cx="13" cy="35" r="2" fill="#f0e0bc" opacity="0.55"/>
+            </svg>
+          </div>
+          <p class="svc-desc">We go through the whole interior — vacuum, extract, condition the leather, clean every panel. If it can be restored, it will be.</p>
+          <ul class="svc-feats">
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Deep vacuum &amp; extraction
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Leather conditioning
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Panel &amp; trim restoration
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Headliner cleaning
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Odour elimination
+            </li>
+          </ul>
+            </div>
+            <div>
+              <a href="#contact" class="svc-link">Book This</a>
+              <span class="card-flip-hint">Tap card for details →</span>
+            </div>
+          </div>
+          <div class="card-back">
+            <div>
+              <p class="card-back-label">What We Go Through</p>
+              <h4 class="card-back-title">Every Panel.<br>Every Crevice.</h4>
+              <p class="card-back-body">Hot steam extraction on carpets and fabric seats — not just a vacuum pass. Leather cleaned with a pH-balanced solution, then conditioned so it stays supple and doesn't crack. Detailing brushes through every vent and trim gap. Headliner spot-treated. An odour neutraliser throughout — not a fragrance spray, something that eliminates the source. Usually 3–4 hours.</p>
+            </div>
+            <div class="card-back-cta">
+              <a href="#contact" class="btn-gold">Book This</a>
+              <button class="card-back-close">↩ Flip back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Full Concours (sparkle icons) -->
+      <div class="svc-card reveal d3">
+        <div class="card-inner">
+          <div class="card-front">
+            <div class="svc-badge">Most Popular</div>
+            <div>
+          <div class="svc-card-top">
+            <div class="svc-card-title-block">
+              <span class="svc-num">03</span>
+              <div class="svc-name">Full Concours</div>
+              <div class="svc-price">$299</div>
+              <div class="svc-price-n">Starting from</div>
+            </div>
+            <!-- Freshly detailed car silhouette -->
+            <svg class="svc-card-img" width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="car-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8cc90"/><stop offset="100%" stop-color="#c8a050"/></linearGradient>
+              </defs>
+              <!-- Cabin / roof -->
+              <rect x="21" y="26" width="30" height="15" rx="6" fill="#d4aa6e" opacity="0.85"/>
+              <!-- Windscreen glare -->
+              <rect x="24" y="28" width="11" height="9" rx="2" fill="#b8924a" opacity="0.22"/>
+              <!-- Main body -->
+              <rect x="10" y="37" width="52" height="13" rx="4" fill="url(#car-body)"/>
+              <!-- Body side highlight -->
+              <rect x="10" y="37" width="52" height="4" rx="2" fill="white" opacity="0.12"/>
+              <!-- Front bumper -->
+              <rect x="52" y="39" width="10" height="7" rx="2" fill="#c8a050"/>
+              <!-- Rear bumper -->
+              <rect x="10" y="39" width="10" height="7" rx="2" fill="#c8a050"/>
+              <!-- Rear wheel -->
+              <circle cx="19" cy="50" r="8" fill="#9a7430"/>
+              <circle cx="19" cy="50" r="5.2" fill="#c8a050"/>
+              <circle cx="19" cy="50" r="2.2" fill="#9a7430"/>
+              <!-- Front wheel -->
+              <circle cx="53" cy="50" r="8" fill="#9a7430"/>
+              <circle cx="53" cy="50" r="5.2" fill="#c8a050"/>
+              <circle cx="53" cy="50" r="2.2" fill="#9a7430"/>
+              <!-- Shine sparkles (3-point stars) top-right -->
+              <path d="M55 17 L56 14 L57 17 L60 18 L57 19 L56 22 L55 19 L52 18 Z" fill="#b8924a" opacity="0.88"/>
+              <path d="M62 23 L62.8 21 L63.6 23 L65.6 23.5 L63.6 24.5 L62.8 26.5 L62 24.5 L60 23.5 Z" fill="#b8924a" opacity="0.55"/>
+              <circle cx="51" cy="12" r="1.6" fill="#b8924a" opacity="0.38"/>
+            </svg>
+          </div>
+          <p class="svc-desc">The whole package — exterior and interior done properly. Paint decontaminated, corrected, and protected. This is the one most clients come back for.</p>
+          <ul class="svc-feats">
+            <li>
+              <svg class="feat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b8924a" stroke-width="1.8">
+                <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/>
+                <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/>
+                <path d="M5 15l.5 1.5L7 17l-1.5.5L5 19l-.5-1.5L3 17l1.5-.5L5 15z"/>
+              </svg>
+              Everything in Signature + Elite
+            </li>
+            <li>
+              <svg class="feat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b8924a" stroke-width="1.8">
+                <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/>
+                <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/>
+                <path d="M5 15l.5 1.5L7 17l-1.5.5L5 19l-.5-1.5L3 17l1.5-.5L5 15z"/>
+              </svg>
+              Paint decontamination
+            </li>
+            <li>
+              <svg class="feat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b8924a" stroke-width="1.8">
+                <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/>
+                <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/>
+                <path d="M5 15l.5 1.5L7 17l-1.5.5L5 19l-.5-1.5L3 17l1.5-.5L5 15z"/>
+              </svg>
+              One-step paint correction
+            </li>
+            <li>
+              <svg class="feat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b8924a" stroke-width="1.8">
+                <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/>
+                <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/>
+                <path d="M5 15l.5 1.5L7 17l-1.5.5L5 19l-.5-1.5L3 17l1.5-.5L5 15z"/>
+              </svg>
+              Carnauba wax protection
+            </li>
+            <li>
+              <svg class="feat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b8924a" stroke-width="1.8">
+                <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/>
+                <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/>
+                <path d="M5 15l.5 1.5L7 17l-1.5.5L5 19l-.5-1.5L3 17l1.5-.5L5 15z"/>
+              </svg>
+              Engine bay detail
+            </li>
+          </ul>
+            </div>
+            <div>
+              <a href="#contact" class="svc-link">Book This</a>
+              <span class="card-flip-hint">Tap card for details →</span>
+            </div>
+          </div>
+          <div class="card-back">
+            <div>
+              <p class="card-back-label">The Full Process</p>
+              <h4 class="card-back-title">Inside Out.<br>Properly Done.</h4>
+              <p class="card-back-body">Wash, clay bar, steam extract, leather condition — then further. Iron remover dissolves embedded metal particles before polishing. A DA polisher cuts out the swirl marks and oxidation you've been ignoring. Carnauba wax applied by hand. Engine bay pressure-cleaned and dressed. This is what the car should have always looked like.</p>
+            </div>
+            <div class="card-back-cta">
+              <a href="#contact" class="btn-gold">Book This</a>
+              <button class="card-back-close">↩ Flip back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Ceramic Shield -->
+      <div class="svc-card reveal d4">
+        <div class="card-inner">
+          <div class="card-front">
+            <div>
+          <div class="svc-card-top">
+            <div class="svc-card-title-block">
+              <span class="svc-num">04</span>
+              <div class="svc-name">Ceramic Shield</div>
+              <div class="svc-price">$599+</div>
+              <div class="svc-price-n">Varies by vehicle</div>
+            </div>
+            <!-- Ceramic coating dropper bottle + water bead -->
+            <svg class="svc-card-img" width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="cc-bottle" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#eedbb5"/><stop offset="100%" stop-color="#c89040"/></linearGradient>
+                <linearGradient id="cc-cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d4a855"/><stop offset="100%" stop-color="#9a7030"/></linearGradient>
+                <radialGradient id="cc-drop" cx="38%" cy="32%"><stop offset="0%" stop-color="#f0e8d0" stop-opacity="0.9"/><stop offset="100%" stop-color="#b8924a" stop-opacity="0.7"/></radialGradient>
+              </defs>
+              <!-- bottle body -->
+              <rect x="26" y="28" width="20" height="36" rx="5" fill="url(#cc-bottle)"/>
+              <!-- bottle shoulder taper -->
+              <path d="M26 28 L30 20 L36 18 L42 20 L46 28 Z" fill="#d4a050"/>
+              <!-- bottle neck -->
+              <rect x="31" y="14" width="10" height="8" rx="3" fill="#c89040"/>
+              <!-- cap -->
+              <rect x="29" y="8" width="14" height="9" rx="3" fill="url(#cc-cap)"/>
+              <!-- dropper tip -->
+              <ellipse cx="36" cy="7" rx="3" ry="2" fill="#9a7030"/>
+              <!-- liquid drop from tip -->
+              <ellipse cx="36" cy="5" rx="1.5" ry="2" fill="#b8924a" opacity="0.55"/>
+              <!-- label -->
+              <rect x="28" y="33" width="16" height="10" rx="2" fill="#b8924a" opacity="0.2"/>
+              <line x1="30" y1="36.5" x2="42" y2="36.5" stroke="#b8924a" stroke-width="0.8" opacity="0.4"/>
+              <line x1="31" y1="39.5" x2="41" y2="39.5" stroke="#b8924a" stroke-width="0.8" opacity="0.3"/>
+              <!-- side shadow -->
+              <rect x="42" y="28" width="4" height="36" rx="2" fill="#9a7030" opacity="0.22"/>
+              <!-- water bead bottom right - shows hydrophobic effect -->
+              <ellipse cx="57" cy="56" rx="8" ry="5.5" fill="url(#cc-drop)" stroke="#b8924a" stroke-width="0.8" opacity="0.85"/>
+              <ellipse cx="55" cy="53.5" rx="2.5" ry="1.5" fill="white" opacity="0.4"/>
+              <!-- surface line -->
+              <line x1="44" y1="62" x2="66" y2="62" stroke="#b8924a" stroke-width="0.8" opacity="0.3"/>
+            </svg>
+          </div>
+          <p class="svc-desc">Multi-stage correction, then a 9H ceramic coat that bonds to the paint. Water beads off, UV can't fade it, and light scratches don't stick. Lasts two-plus years.</p>
+          <ul class="svc-feats">
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Multi-stage paint correction
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              9H ceramic coating
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              2+ year protection
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              Hydrophobic nano-finish
+            </li>
+            <li>
+              <svg class="feat-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 0L7.8 4.2L12 6L7.8 7.8L6 12L4.2 7.8L0 6L4.2 4.2L6 0Z" fill="#b8924a"/>
+              </svg>
+              UV &amp; scratch resistance
+            </li>
+          </ul>
+            </div>
+            <div>
+              <a href="#contact" class="svc-link">Enquire Now</a>
+              <span class="card-flip-hint">Tap card for details →</span>
+            </div>
+          </div>
+          <div class="card-back">
+            <div>
+              <p class="card-back-label">What Bonds to the Paint</p>
+              <h4 class="card-back-title">Chemistry,<br>Not Just Polish.</h4>
+              <p class="card-back-body">Multi-stage machine polishing removes every defect before any ceramic touches the car — coating over flaws locks them in permanently. The 9H coat bonds chemically to the clear coat rather than sitting on top. Once cured (48 hrs), water sheets off, UV can't fade it, and light scratches don't cut through. A hand wash every 8–12 weeks keeps it active. Lasts 2–3 years.</p>
+            </div>
+            <div class="card-back-cta">
+              <a href="#contact" class="btn-gold">Enquire Now</a>
+              <button class="card-back-close">↩ Flip back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Custom Job Card -->
+    <div class="svc-custom reveal">
+      <div class="svc-custom-text">
+        <h3>Something Different?</h3>
+        <p>Not every car fits neatly into a package. Tell us what you've got — the condition it's in, what you want out of it — and we'll work out a price together. No guesswork, no surprises.</p>
+      </div>
+      <a href="#contact" class="svc-custom-btn">Get a Quote</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="why" id="why">
+  <div class="container">
+    <div class="why-inner">
+      <div class="reveal-l">
+        <div class="lbl">Why Apex Detail</div>
+        <h2 class="sec-h">The Standard<br>We Hold Ourselves To</h2>
+        <p class="sec-p">We've been doing this long enough to know what actually matters — the right product, enough time on the car, and no shortcuts. Every vehicle leaves cleaner than it arrived. That's the only standard we know.</p>
+        <br><br>
+        <a href="#contact" class="btn-gold" style="display:inline-block">Schedule a Detail</a>
+      </div>
+      <div class="why-grid reveal-r">
+        <div class="why-card">
+          <div class="why-num">01</div>
+          <div class="why-t">Pro-Grade Only</div>
+          <div class="why-p">We use Meguiar's Professional, CarPro, and IGL coating systems. The brands the trade actually trusts.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-num">02</div>
+          <div class="why-t">Done by Hand</div>
+          <div class="why-p">Every panel, every surface. A machine is faster, but it misses things. We'd rather take the time.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-num">03</div>
+          <div class="why-t">We Come to You</div>
+          <div class="why-p">Home, office, wherever the car is. No drop-off, no waiting rooms. We fit around your schedule.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-num">04</div>
+          <div class="why-t">We Back Our Work</div>
+          <div class="why-p">If you're not happy, we come back and fix it. No argument, no runaround. Your result is our reputation.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery" id="gallery">
+  <div class="container">
+    <div class="gal-head reveal">
+      <div class="lbl center">Our Work</div>
+      <h2 class="sec-h">The Results<br>Speak for Themselves</h2>
+    </div>
+  </div>
+  <div class="container" style="max-width:1380px">
+    <div class="gal-grid">
+      <div class="gal-item reveal d1" onclick="openPortfolioModal('porsche')">
+        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=900&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
+        <div class="gal-ov">
+          <span class="gal-ov-lbl">Paint Correction — Porsche 911</span>
+          <span class="gal-ov-cta">View Case Study →</span>
+        </div>
+      </div>
+      <div class="gal-item reveal d2" onclick="openPortfolioModal('bmw')">
+        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=700&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
+        <div class="gal-ov">
+          <span class="gal-ov-lbl">Ceramic Shield — BMW M3</span>
+          <span class="gal-ov-cta">View Case Study →</span>
+        </div>
+      </div>
+      <div class="gal-item reveal d3" onclick="openPortfolioModal('rangerover')">
+        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=700&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
+        <div class="gal-ov">
+          <span class="gal-ov-lbl">Interior Detail — Range Rover</span>
+          <span class="gal-ov-cta">View Case Study →</span>
+        </div>
+      </div>
+      <div class="gal-item reveal d4" onclick="openPortfolioModal('ferrari')">
+        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=700&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
+        <div class="gal-ov">
+          <span class="gal-ov-lbl">Full Concours — Ferrari 488</span>
+          <span class="gal-ov-cta">View Case Study →</span>
+        </div>
+      </div>
+      <div class="gal-item reveal d5" onclick="openPortfolioModal('lamborghini')">
+        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
+        <div class="gal-ov">
+          <span class="gal-ov-lbl">Wheel Restoration — Lamborghini</span>
+          <span class="gal-ov-cta">View Case Study →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi" id="testimonials">
+  <div class="container">
+    <div class="testi-head reveal">
+      <div class="lbl center">Testimonials</div>
+      <h2 class="sec-h">What Clients Say</h2>
+    </div>
+    <div class="testi-carousel reveal">
+      <button class="tcarr-arr" id="testiPrev" aria-label="Previous testimonial">
+        <svg viewBox="0 0 20 20"><polyline points="13 16 7 10 13 4"/></svg>
+      </button>
+      <div class="testi-card" id="testiCard">
+        <div class="testi-stars">
+          <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        </div>
+        <div class="testi-q">"</div>
+        <p class="testi-txt" id="testiTxt">I brought in my 911 with heavy swirl marks from a previous shop. They corrected it to a standard I didn't think was still possible. Looks better now than the day I collected it.</p>
+        <div class="testi-div"></div>
+        <div class="testi-name" id="testiName">Marcus R.</div>
+        <div class="testi-vehicle" id="testiVehicle">Porsche 911 GT3 — Ceramic Shield</div>
+      </div>
+      <button class="tcarr-arr" id="testiNext" aria-label="Next testimonial">
+        <svg viewBox="0 0 20 20"><polyline points="7 4 13 10 7 16"/></svg>
+      </button>
+    </div>
+    <div class="tcarr-dots" id="testiDots">
+      <button class="tcarr-dot active"></button>
+      <button class="tcarr-dot"></button>
+      <button class="tcarr-dot"></button>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <div class="reveal-l">
+        <div class="lbl">Get In Touch</div>
+        <h2 class="sec-h">Begin Your<br>Care Cycle</h2>
+        <p class="sec-p">We don't believe in one-and-done washes. Every relationship begins with a thorough diagnostic of your vehicle's clear coat condition, interior material needs, and your long-term preservation goals.</p>
+        <div class="contact-items">
+          <div>
+            <div class="ci-lbl">Phone</div>
+            <div class="ci-val">(555) 000 — 1234</div>
+          </div>
+          <div>
+            <div class="ci-lbl">Email</div>
+            <div class="ci-val">hello@apexdetail.co</div>
+          </div>
+          <div>
+            <div class="ci-lbl">Service Area</div>
+            <div class="ci-val">We come to you.<br>Metro &amp; surrounding areas.</div>
+          </div>
+          <div>
+            <div class="ci-lbl">Hours</div>
+            <div class="ci-val">Monday – Saturday<br>8:00 AM – 6:00 PM</div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal-r">
+        <div class="detailer-card" onclick="openBioModal()" style="cursor:pointer">
+          <img class="detailer-avatar"
+            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=140&h=140&fit=crop&auto=format&q=80"
+            alt="Master Detailer">
+          <div class="detailer-info">
+            <span class="bio-trigger-tag">Read Bio →</span>
+            <div class="detailer-name">Marcus Hale</div>
+            <div class="detailer-title">Master Detailer — Your Region</div>
+            <p class="detailer-quote">"Every detail is hand-vetted to ensure zero shortcuts. Tell me about your vehicle below, and I'll personally confirm your slot."</p>
+          </div>
+        </div>
+        <p class="form-allocation">Allocation is strictly limited. Every vehicle enters our Private Registry, allowing us to track your paint's health over time and tailor future maintenance cycles. Tell us about your configuration below.</p>
+        <form onsubmit="handleForm(event)">
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">First Name</label>
+              <input type="text" class="fi" placeholder="James" required>
+            </div>
+            <div class="fg">
+              <label class="fl">Last Name</label>
+              <input type="text" class="fi" placeholder="Thornton" required>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Email Address</label>
+            <input type="email" class="fi" placeholder="james@email.com" required>
+          </div>
+          <div class="fg">
+            <label class="fl">Phone Number</label>
+            <input type="tel" class="fi" placeholder="(555) 000 — 0000">
+          </div>
+          <div class="fg">
+            <label class="fl">Vehicle</label>
+            <input type="text" class="fi" placeholder="2024 BMW M3 Competition">
+          </div>
+          <div class="fg">
+            <label class="fl">Package</label>
+            <select class="fsel">
+              <option value="">Select an Initial Diagnostic / Treatment</option>
+              <option>Signature Wash — $89+</option>
+              <option>Interior Elite — $149+</option>
+              <option>Full Concours — $299+</option>
+              <option>Ceramic Shield — $599+</option>
+              <option>Custom / Not Sure Yet</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Message</label>
+            <textarea class="fta" placeholder="Tell us about the car and what you're after..."></textarea>
+          </div>
+          <button type="submit" class="fsub" id="fsub">Submit for Assessment</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="foot-inner">
+      <div class="foot-logo">APEX <span>DETAIL</span></div>
+      <ul class="foot-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="foot-copy">© 2026 Apex Detail. All rights reserved.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Custom Cursor ───────────────────────────
+const cur = document.getElementById('cur');
+const ring = document.getElementById('ring');
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx+'px'; cur.style.top = my+'px';
+});
+(function tick(){
+  rx += (mx-rx)*.11; ry += (my-ry)*.11;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  requestAnimationFrame(tick);
+})();
+
+document.querySelectorAll('a,button,.svc-card,.why-card,.gal-item,.testi-card,.svc-custom').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ cur.classList.add('hov'); ring.classList.add('hov'); });
+  el.addEventListener('mouseleave',()=>{ cur.classList.remove('hov'); ring.classList.remove('hov'); });
+});
+
+// ── Nav scroll ──────────────────────────────
+const nav = document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('stuck', scrollY>70));
+
+// ── Scroll reveal ───────────────────────────
+const ro = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
+},{ threshold:.50, rootMargin:'0px 0px -120px 0px' });
+document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el=>{
+  ro.observe(el);
+});
+
+
+// ── Counter ─────────────────────────────────
+const co = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const el=e.target, target=+el.dataset.count;
+    let v=0; const step=target/120;
+    const t=setInterval(()=>{
+      v=Math.min(v+step,target);
+      el.textContent=Math.floor(v).toLocaleString()+'+';
+      if(v>=target) clearInterval(t);
+    },16);
+    co.unobserve(el);
+  });
+},{ threshold:.5 });
+document.querySelectorAll('[data-count]').forEach(el=>co.observe(el));
+
+// ── Mobile nav ──────────────────────────────
+const mob=document.getElementById('mobNav');
+function openMob(){ mob.classList.add('open'); document.body.style.overflow='hidden'; }
+function closeMob(){ mob.classList.remove('open'); document.body.style.overflow=''; }
+
+// ── Form ────────────────────────────────────
+function handleForm(e){
+  e.preventDefault();
+  const btn=document.getElementById('fsub');
+  btn.textContent='Appointment Requested ✓';
+  btn.style.cssText='background:#2e4a2e;color:#7abf7a;cursor:none';
+  setTimeout(()=>{
+    btn.textContent='Submit for Assessment';
+    btn.style.cssText='';
+    e.target.reset();
+  },4500);
+}
+
+
+// ── Card flip ───────────────────────────────
+document.querySelectorAll('.svc-card').forEach(card=>{
+  card.addEventListener('click',e=>{
+    if(e.target.closest('a,.card-back-close')) return;
+    card.classList.toggle('flipped');
+  });
+  card.querySelector('.card-back-close')?.addEventListener('click',()=>{
+    card.classList.remove('flipped');
+  });
+});
+
+// ── Portfolio Modal ─────────────────────────
+const portfolioData = {
+  porsche:{
+    package:'PAINT CORRECTION', title:'Porsche 911 GT3',
+    img:'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=900&auto=format&fit=crop&q=80',
+    story:'Arrived with deep machine swirl marks and light track-day abrasions from a previous shop. We performed a rigorous 2-stage paint correction over 14 hours, levelling 95%+ of clear coat defects before locking in an absolute glass reflection with a 9H nano-ceramic composite coating.',
+    time:'14 Hours', correction:'2-Stage (95%+ Clear)',
+    quote:'I brought in my 911 with heavy swirls from a previous detailer. They corrected it to a standard I didn\'t think was still possible. Looks better now than the day I collected it.',
+    author:'Marcus R.'
+  },
+  bmw:{
+    package:'FULL CONCOURS', title:'BMW M3 Competition',
+    img:'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900&auto=format&fit=crop&q=80',
+    story:'Decontaminated entirely with iron-dissolving chemical washes and a full clay bar extraction. Polished via dual-action system to reveal a deep metallic gloss. Finished with hand-applied Brazilian Carnauba wax and a meticulous engine bay treatment that shed years of road grime.',
+    time:'8 Hours', correction:'1-Step High Gloss',
+    quote:'I\'ve used three other detailers. None of them came close to this. The attention they give each panel is something you just have to see.',
+    author:'James T.'
+  },
+  rangerover:{
+    package:'INTERIOR ELITE', title:'Range Rover SV Autobiography',
+    img:'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=900&auto=format&fit=crop&q=80',
+    story:'Full cabin restoration on a high-mileage SV. Steam extraction pulled deep-set staining from the Ebony Windsor leather, followed by a pH-neutral conditioning treatment. Every vent, trim crevice, and headliner panel was addressed by hand. Odour neutraliser applied throughout — not a fragrance cover-up.',
+    time:'6 Hours', correction:'Full Interior Restoration',
+    quote:'The interior looks and smells like a brand new car. Worth every single penny. They treated it like it was their own.',
+    author:'Sophia K.'
+  },
+  ferrari:{
+    package:'FULL CONCOURS', title:'Ferrari 488 GTB',
+    img:'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=900&auto=format&fit=crop&q=80',
+    story:'Rosso Corsa paintwork presenting with fine marring and bonded rail dust from a cross-country drive. Iron remover, full decontamination, and a one-step machine polish restored the depth and wet-look gloss expected of a Ferrari. Carnauba wax applied by hand in three passes.',
+    time:'10 Hours', correction:'1-Step Gloss Restoration',
+    quote:'You can see your own reflection clearly in the bonnet. I\'ve had the car six years and it has never looked this good.',
+    author:'Daniel F.'
+  },
+  lamborghini:{
+    package:'CERAMIC SHIELD', title:'Lamborghini Huracán EVO',
+    img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&auto=format&fit=crop&q=80',
+    story:'Wheel restoration on a set of 20″ Leirion units with heavy brake dust etching and kerb rash on two faces. Each face machine-polished individually, then sealed with a ceramic wheel coating rated to 900°C. The result holds clean four times longer between maintenance washes.',
+    time:'5 Hours', correction:'Ceramic Wheel Sealed',
+    quote:'Booked them specifically for the ceramic wheel coating. Six months later and they still look freshly detailed after a quick rinse.',
+    author:'Ryan O.'
+  }
+};
+
+function openBioModal(){
+  document.getElementById('bio-modal').setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+}
+function closeBioModal(){
+  document.getElementById('bio-modal').setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+}
+
+function openPortfolioModal(id){
+  const d=portfolioData[id]; if(!d) return;
+  document.getElementById('modal-main-img').src=d.img;
+  document.getElementById('modal-package-tag').textContent=d.package;
+  document.getElementById('modal-vehicle-title').textContent=d.title;
+  document.getElementById('modal-story-text').textContent=d.story;
+  document.getElementById('modal-metric-time').textContent=d.time;
+  document.getElementById('modal-metric-correction').textContent=d.correction;
+  document.getElementById('modal-quote-text').textContent='“'+d.quote+'”';
+  document.getElementById('modal-quote-author').textContent='— '+d.author;
+  const m=document.getElementById('portfolio-modal');
+  m.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+}
+function closePortfolioModal(){
+  document.getElementById('portfolio-modal').setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closePortfolioModal(); closeBioModal(); } });
+
+// ── Testimonial carousel ─────────────────────
+(function(){
+  const testimonials = [
+    { txt: "I brought in my 911 with heavy swirl marks from a previous shop. They corrected it to a standard I didn't think was still possible. Looks better now than the day I collected it.", name: "Marcus R.", vehicle: "Porsche 911 GT3 — Ceramic Shield" },
+    { txt: "The interior of my Range Rover was a state after a long road trip. They turned it around completely — the leather feels new again. Genuinely impressed start to finish.", name: "Sophia L.", vehicle: "Range Rover Sport — Interior Elite" },
+    { txt: "I've used three other detailers. None of them came close to this. The attention they give each panel is something you just have to see. Won't be going anywhere else.", name: "James T.", vehicle: "BMW M5 Competition — Full Concours" },
+  ];
+  const card = document.getElementById('testiCard');
+  const txtEl = document.getElementById('testiTxt');
+  const nameEl = document.getElementById('testiName');
+  const vehicleEl = document.getElementById('testiVehicle');
+  const dots = Array.from(document.querySelectorAll('.tcarr-dot'));
+  let current = 0;
+  function go(next) {
+    current = ((next % testimonials.length) + testimonials.length) % testimonials.length;
+    card.classList.add('fading');
+    setTimeout(() => {
+      const t = testimonials[current];
+      txtEl.textContent = t.txt;
+      nameEl.textContent = t.name;
+      vehicleEl.textContent = t.vehicle;
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      card.classList.remove('fading');
+    }, 240);
+  }
+  document.getElementById('testiNext')?.addEventListener('click', () => go(current + 1));
+  document.getElementById('testiPrev')?.addEventListener('click', () => go(current - 1));
+  dots.forEach((d, i) => d.addEventListener('click', () => go(i)));
+})();
+
+// ── Smooth anchor ───────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth'}); }
+  });
+});
+</script>
+
+<div id="bio-modal" class="portfolio-modal" aria-hidden="true">
+  <div class="modal-overlay" onclick="closeBioModal()"></div>
+  <div class="modal-window" style="max-width:620px;height:auto;max-height:82vh">
+    <button class="modal-close-btn" onclick="closeBioModal()" aria-label="Close">✕</button>
+    <div class="modal-content-panel" style="padding:3rem 2.8rem;justify-content:flex-start">
+      <span class="modal-kicker">Master Detailer</span>
+      <h2 class="modal-title">Marcus Hale</h2>
+      <hr class="modal-divider">
+      <div class="modal-story-section">
+        <h3>Background &amp; Expertise</h3>
+        <p>With over a decade of paint correction experience handling concours-level exotics and rare vintage clear coats, Marcus approaches every machine as a rolling piece of art. Certified in advanced nano-ceramic applications and multi-stage paint levelling, he has personally overseen more than 400 full-correction details — each documented in the client registry.</p>
+      </div>
+      <div class="modal-story-section" style="margin-top:1.8rem">
+        <h3>The Philosophy</h3>
+        <p>"I don't believe in volume. I limit our allocation to a strict weekly cap because real precision requires clear eyes and zero time pressure. Your clear coat isn't just washed — its structural health is managed over time, detail by detail."</p>
+      </div>
+      <div class="modal-metrics-grid" style="margin-top:2rem">
+        <div class="metric-card">
+          <span class="metric-label">Details Completed</span>
+          <span class="metric-value">400+</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Experience</span>
+          <span class="metric-value">12 Years</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="portfolio-modal" class="portfolio-modal" aria-hidden="true">
+  <div class="modal-overlay" onclick="closePortfolioModal()"></div>
+  <div class="modal-window">
+    <button class="modal-close-btn" onclick="closePortfolioModal()" aria-label="Close">✕</button>
+    <div class="modal-grid">
+      <div class="modal-media-gallery">
+        <div class="main-media-container">
+          <img id="modal-main-img" src="" alt="">
+        </div>
+      </div>
+      <div class="modal-content-panel">
+        <span class="modal-kicker" id="modal-package-tag"></span>
+        <h2 class="modal-title" id="modal-vehicle-title"></h2>
+        <hr class="modal-divider">
+        <div class="modal-story-section">
+          <h3>The Transformation Story</h3>
+          <p id="modal-story-text"></p>
+        </div>
+        <div class="modal-metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Time Invested</span>
+            <span class="metric-value" id="modal-metric-time"></span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Paint Correction</span>
+            <span class="metric-value" id="modal-metric-correction"></span>
+          </div>
+        </div>
+        <blockquote class="modal-quote">
+          <p id="modal-quote-text"></p>
+          <cite id="modal-quote-author"></cite>
+        </blockquote>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
