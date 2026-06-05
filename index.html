@@ -971,21 +971,22 @@ footer {
     max-width:360px;
     width:100%;
   }
-  .svc-card {
+  .svc-card,
+  .svc-card.reveal {
     position:absolute !important;
     width:100% !important;
     height:100% !important;
     top:0; left:0;
     opacity:0 !important;
     pointer-events:none;
-    transform:scale(0.9) translateY(20px);
-    transition:opacity .5s cubic-bezier(0.16,1,0.3,1), transform .5s cubic-bezier(0.16,1,0.3,1);
+    transform:none !important;
+    transition:opacity .35s ease !important;
+    transition-delay:0s !important;
     z-index:1;
   }
   .svc-card.active-stack-card {
     opacity:1 !important;
     pointer-events:auto;
-    transform:scale(1) translateY(0);
     z-index:10;
   }
   .svc-mob-nav { display:flex; }
