@@ -84,24 +84,11 @@ body::after {
 .d1{transition-delay:.08s} .d2{transition-delay:.18s} .d3{transition-delay:.28s}
 .d4{transition-delay:.38s} .d5{transition-delay:.48s}
 
-/* Pricing card reveal — slow luxury cascade */
-.svc-card.reveal {
-  opacity:0;
-  transform:translateY(36px);
-  transition:opacity 15s var(--ease),transform 15s var(--ease);
-}
-.svc-card.reveal.in { opacity:1; transform:none; }
-.svc-card.d1 { transition-delay:0.1s; }
-.svc-card.d2 { transition-delay:0.5s; }
-.svc-card.d3 { transition-delay:1s; }
-.svc-card.d4 { transition-delay:1.5s; }
-
 /* Custom job card reveal */
 .svc-custom.reveal {
   opacity:0;
   transform:translateY(28px);
-  transition:opacity 15s var(--ease),transform 15s var(--ease);
-  transition-delay:0.8s;
+  transition:opacity .9s var(--ease),transform .9s var(--ease);
 }
 .svc-custom.reveal.in { opacity:1; transform:none; }
 
@@ -169,7 +156,7 @@ nav.stuck {
   display:flex; align-items:center; justify-content:center;
   overflow:hidden;
 }
-/* Ken Burns on hero — one-shot luxury zoom on load */
+/* ── HERO BACKGROUND ─────────────────────────── */
 .hero-bg-image {
   position:absolute;
   top:-5%; left:-5%;
@@ -177,12 +164,6 @@ nav.stuck {
   object-fit:cover;
   object-position:center 40%;
   z-index:0;
-  animation:luxuryZoom 12s ease-out forwards;
-  transform-origin:center center;
-}
-@keyframes luxuryZoom {
-  0%   { transform:scale(1.0); }
-  100% { transform:scale(1.05); }
 }
 .hero-bg {
   position:absolute; inset:0; z-index:1;
@@ -191,6 +172,162 @@ nav.stuck {
     radial-gradient(ellipse 35% 55% at 28% 38%, rgba(184,146,74,.04) 0%, transparent 55%),
     linear-gradient(rgba(28,24,16,.52), rgba(28,24,16,.52)),
     linear-gradient(155deg,rgba(250,246,240,.55) 0%,rgba(245,239,229,.38) 50%,rgba(240,234,216,.46) 100%);
+}
+
+/* ── REGISTRY GATE CURTAIN ───────────────────── */
+.registry-gate-curtain {
+  position:fixed; inset:0; z-index:9999;
+  background:#050505;
+  transition:transform 1.8s cubic-bezier(0.16,1,0.3,1);
+  will-change:transform;
+  overflow:hidden;
+}
+#gate-canvas {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  display:block;
+  z-index:0;
+}
+.gate-bottom-grad {
+  position:absolute; bottom:0; left:0; right:0; height:45%;
+  background:linear-gradient(to top, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.6) 45%, transparent 100%);
+  z-index:1; pointer-events:none;
+}
+.gate-detail-hint {
+  display:flex; align-items:center; gap:.55em;
+  margin:0 0 22px; font-size:.66rem; font-weight:500;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:rgba(214,193,156,.62);
+  animation:gdhPulse 3.2s ease-in-out infinite;
+}
+.gate-detail-hint .gdh-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:#d6c19c; box-shadow:0 0 10px 1px rgba(214,193,156,.8);
+  animation:gdhDot 1.8s ease-in-out infinite;
+}
+@keyframes gdhPulse { 0%,100%{opacity:.6} 50%{opacity:1} }
+@keyframes gdhDot { 0%,100%{transform:scale(1);opacity:.7} 50%{transform:scale(1.5);opacity:1} }
+body.gate-unlocked .gate-detail-hint { opacity:0; }
+body.gate-unlocked .registry-gate-curtain {
+  transform:translateY(-100vh);
+  pointer-events:none;
+}
+.gate-overlay {
+  position:absolute; inset:0; z-index:2;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-end;
+  padding-bottom:clamp(40px,7vh,80px);
+  pointer-events:none;
+}
+.gate-overlay > * { pointer-events:auto; }
+.gate-logo {
+  font-family:var(--font-d); font-size:.78rem; font-weight:600;
+  letter-spacing:.42em; text-transform:uppercase;
+  color:#FFFFFF !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.95);
+}
+.gate-logo em { color:var(--gold); font-style:normal; }
+.gate-tagline {
+  font-family:var(--font-s); font-size:.95rem; font-weight:400; font-style:italic;
+  color:#F5F5F5 !important; letter-spacing:.04em; margin-top:6px;
+  text-shadow:0 4px 12px rgba(0,0,0,0.9);
+}
+/* ── GATE CAR STAGE ──────────────────────────── */
+.gate-3d-stage {
+  width:min(92vw,960px);
+  aspect-ratio:16 / 9;
+  margin:0 auto 24px;
+  position:relative;
+  display:grid;
+  place-items:center;
+  perspective:1200px;
+}
+.gate-car-shell {
+  position:relative;
+  width:100%;
+  height:100%;
+  transform-style:preserve-3d;
+  animation:gate-car-float 7s cubic-bezier(0.16,1,0.3,1) infinite;
+  will-change:transform,filter;
+}
+.gate-car-shell::before {
+  content:'';
+  position:absolute;
+  inset:11% 8% 12%;
+  z-index:2;
+  background:linear-gradient(105deg,transparent 24%,rgba(255,255,255,.22) 43%,transparent 58%);
+  mix-blend-mode:screen;
+  transform:translateX(-58%) skewX(-12deg);
+  animation:gate-car-sheen 4.8s cubic-bezier(0.16,1,0.3,1) infinite;
+  pointer-events:none;
+}
+.gate-car-shell img {
+  width:100%; height:100%;
+  display:block;
+  object-fit:contain;
+  filter:
+    drop-shadow(0 26px 42px rgba(0,0,0,.9))
+    drop-shadow(0 0 28px rgba(184,146,74,.13));
+  transform:translateZ(38px);
+  user-select:none;
+  pointer-events:none;
+}
+.gate-car-depth {
+  position:absolute;
+  left:8%; right:8%; bottom:9%;
+  height:20%;
+  border-radius:50%;
+  background:
+    radial-gradient(ellipse at center,rgba(255,255,255,.18),rgba(184,146,74,.11) 28%,transparent 64%);
+  filter:blur(12px);
+  transform:rotateX(70deg) translateZ(-54px);
+  opacity:.75;
+  pointer-events:none;
+}
+@keyframes gate-car-float {
+  0%,100% {
+    transform:rotateX(2deg) rotateY(-6deg) translate3d(0,0,0) scale(1);
+    filter:saturate(1.02) contrast(1.04);
+  }
+  50% {
+    transform:rotateX(-1deg) rotateY(6deg) translate3d(0,-12px,42px) scale(1.018);
+    filter:saturate(1.08) contrast(1.09);
+  }
+}
+@keyframes gate-car-sheen {
+  0%,22% { transform:translateX(-72%) skewX(-12deg); opacity:0; }
+  36% { opacity:.8; }
+  64% { transform:translateX(62%) skewX(-12deg); opacity:0; }
+  100% { transform:translateX(62%) skewX(-12deg); opacity:0; }
+}
+.gate-branding {
+  display:flex; flex-direction:column; align-items:center;
+  margin:0 0 32px; pointer-events:auto;
+}
+#gate-trigger {
+  font-family:var(--font-d); font-size:.65rem; font-weight:600;
+  letter-spacing:.28em; text-transform:uppercase;
+  color:var(--white); background:transparent;
+  border:1px solid rgba(184,146,74,.5); padding:18px 54px;
+  cursor:none;
+  transition:border-color .35s var(--ease), background .35s var(--ease),
+             transform .35s var(--ease), box-shadow .35s var(--ease);
+}
+#gate-trigger:hover {
+  border-color:var(--gold);
+  background:rgba(184,146,74,.09);
+  transform:translateY(-2px);
+  box-shadow:0 8px 36px rgba(184,146,74,.14);
+}
+#gate-trigger:active { transform:none; }
+/* ── NAV GATE-HIDDEN STATE ───────────────────── */
+.main-header.gate-hidden {
+  opacity:0; transform:translateY(-100%); pointer-events:none;
+  transition:transform 0.8s cubic-bezier(0.16,1,0.3,1) 1.4s,
+             opacity 0.8s 1.4s;
+}
+body.gate-unlocked .main-header.gate-hidden {
+  opacity:1; transform:translateY(0); pointer-events:all;
 }
 .hero-vline {
   position:absolute; left:14%; top:0; width:1px; height:100%;
@@ -210,8 +347,12 @@ nav.stuck {
   text-transform:uppercase; color:#fff;
   display:flex; align-items:center; justify-content:center; gap:18px;
   margin-bottom:34px;
-  opacity:0; animation:luxuryFadeUp 3.8s cubic-bezier(0.16,1,0.3,1) 0.4s forwards;
+  opacity:0; transform:translateY(22px); filter:blur(3px);
+  transition:opacity 1.4s var(--ease) 0.7s,
+             transform 1.4s var(--ease) 0.7s,
+             filter 1.0s var(--ease) 0.7s;
 }
+body.gate-unlocked .hero-eye { opacity:1; transform:none; filter:blur(0); }
 .hero-eye::before,.hero-eye::after {
   content:''; width:36px; height:1px; background:#fff; opacity:.7;
 }
@@ -220,20 +361,31 @@ nav.stuck {
   font-size:clamp(3.8rem,8.5vw,8rem);
   font-weight:400; line-height:.92; letter-spacing:-.01em;
   color:var(--text); margin-bottom:30px;
-  opacity:0; animation:luxuryFadeUp 4.0s cubic-bezier(0.16,1,0.3,1) 1.0s forwards;
+  opacity:0; transform:translateY(22px); filter:blur(3px);
+  transition:opacity 1.6s var(--ease) 1.0s,
+             transform 1.6s var(--ease) 1.0s,
+             filter 1.2s var(--ease) 1.0s;
 }
+body.gate-unlocked .hero-title { opacity:1; transform:none; filter:blur(0); }
 .hero-title em { font-style:normal; color:var(--gold); font-weight:600; }
 .hero-sub {
   font-family:var(--font-s); font-size:clamp(1rem,2vw,1.3rem);
   font-weight:400; font-style:italic; color:rgba(255,255,255,.82);
   max-width:520px; margin:0 auto 56px; line-height:1.65;
   text-shadow:0 1px 12px rgba(0,0,0,.45);
-  opacity:0; animation:luxuryFadeUp 4.2s cubic-bezier(0.16,1,0.3,1) 1.8s forwards;
+  opacity:0; transform:translateY(22px); filter:blur(3px);
+  transition:opacity 1.6s var(--ease) 1.3s,
+             transform 1.6s var(--ease) 1.3s,
+             filter 1.2s var(--ease) 1.3s;
 }
+body.gate-unlocked .hero-sub { opacity:1; transform:none; filter:blur(0); }
 .hero-btns {
   display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
-  opacity:0; animation:luxuryFadeUp 4.4s cubic-bezier(0.16,1,0.3,1) 2.4s forwards;
+  opacity:0; transform:translateY(16px);
+  transition:opacity 1.4s var(--ease) 1.6s,
+             transform 1.4s var(--ease) 1.6s;
 }
+body.gate-unlocked .hero-btns { opacity:1; transform:none; }
 
 .btn-gold {
   font-size:.68rem; font-weight:500; letter-spacing:.2em;
@@ -262,8 +414,9 @@ nav.stuck {
 .hero-scroll {
   position:absolute; bottom:38px; left:50%; transform:translateX(-50%);
   display:flex; flex-direction:column; align-items:center; gap:12px;
-  opacity:0; animation:fadeIn 8s ease 1.4s forwards;
+  opacity:0; transition:opacity 1.8s ease 2.1s;
 }
+body.gate-unlocked .hero-scroll { opacity:1; }
 .hero-scroll-txt {
   font-size:.58rem; letter-spacing:.35em; text-transform:uppercase; color:var(--dim);
 }
@@ -274,11 +427,6 @@ nav.stuck {
 }
 @keyframes pulse-ln { 0%,100%{opacity:.3} 50%{opacity:.85} }
 @keyframes fadeUp { from{opacity:0;transform:translateY(26px)} to{opacity:1;transform:none} }
-@keyframes luxuryFadeUp {
-  from { opacity:0; transform:translateY(28px); filter:blur(4px); }
-  to   { opacity:1; transform:none; filter:blur(0); }
-}
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
 /* ── SHARED ──────────────────────────────── */
 .container { max-width:1200px; margin:0 auto; padding:0 60px; }
@@ -333,32 +481,6 @@ nav.stuck {
   grid-template-columns:repeat(4, 1fr);
   gap:20px;
 }
-.svc-mob-nav {
-  display:none;
-  align-items:center;
-  justify-content:center;
-  gap:20px;
-  margin-top:32px;
-}
-.svc-mob-arr {
-  width:40px; height:40px; border-radius:50%;
-  border:1px solid var(--gold-bdr); background:transparent;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; color:var(--gold);
-  transition:background .25s ease, border-color .25s ease;
-  flex-shrink:0;
-}
-.svc-mob-arr:hover { background:var(--bg-2); border-color:var(--gold); }
-.svc-mob-arr:active { transform:scale(.94); }
-.svc-mob-arr svg { width:16px; height:16px; stroke:var(--gold); fill:none; stroke-width:1.5; }
-.svc-mob-dots { display:flex; gap:8px; }
-.svc-mob-dot {
-  width:6px; height:6px; border-radius:50%;
-  background:var(--gold); opacity:.25; cursor:pointer;
-  border:none; padding:0;
-  transition:opacity .25s ease, transform .25s ease;
-}
-.svc-mob-dot.active { opacity:.85; transform:scale(1.35); }
 
 /* Card base */
 .svc-card {
@@ -434,6 +556,11 @@ nav.stuck {
   opacity:.7; transition:opacity .2s;
 }
 .detailer-card:hover .bio-trigger-tag { opacity:1; }
+.bio-trigger-tag-hidden {
+  font-size:.55rem; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--gold); opacity:.55; margin-top:12px; display:none;
+  font-family:var(--font-b);
+}
 .svc-card-top {
   display:flex; justify-content:space-between; align-items:flex-start;
   margin-bottom:20px;
@@ -951,45 +1078,21 @@ footer {
 }
 
 /* ── RESPONSIVE ───────────────────────────── */
-@media(max-width:1200px){
-}
 @media(max-width:1024px){
+  .svc-grid { grid-template-columns:repeat(2,1fr); }
   .why-inner { gap:60px; }
 }
 @media(max-width:768px){
   nav { padding:18px 24px; }
   nav.stuck { padding:12px 24px; }
+  .gate-3d-stage { max-width:94vw; margin-bottom:18px; }
+  .hero { min-height:720px; }
   .nav-links,.nav-cta { display:none; }
   .nav-ham { display:flex; }
   .container { padding:0 24px; }
   .services,.why,.gallery,.testi,.contact { padding:100px 0; }
-  .svc-grid {
-    display:block !important;
-    position:relative !important;
-    height:520px;
-    margin:0 auto;
-    max-width:360px;
-    width:100%;
-  }
-  .svc-card,
-  .svc-card.reveal {
-    position:absolute !important;
-    width:100% !important;
-    height:100% !important;
-    top:0; left:0;
-    opacity:0 !important;
-    pointer-events:none;
-    transform:none !important;
-    transition:opacity .35s ease !important;
-    transition-delay:0s !important;
-    z-index:1;
-  }
-  .svc-card.active-stack-card {
-    opacity:1 !important;
-    pointer-events:auto;
-    z-index:10;
-  }
-  .svc-mob-nav { display:flex; }
+  .svc-stack-outer { padding-right:0; max-width:100%; }
+  .svc-grid { grid-template-columns:1fr; }
   .svc-custom { flex-direction:column; align-items:flex-start; gap:24px; padding:32px 28px; }
   .why-inner { grid-template-columns:1fr; }
   .why-grid { grid-template-columns:1fr 1fr; }
@@ -1016,6 +1119,23 @@ footer {
 <div class="cursor" id="cur"></div>
 <div class="cursor-ring" id="ring"></div>
 
+<!-- REGISTRY GATE CURTAIN -->
+<div class="registry-gate-curtain">
+  <canvas id="gate-canvas"></canvas>
+  <div class="gate-bottom-grad"></div>
+  <div class="gate-overlay">
+    <div class="gate-branding">
+      <p class="gate-logo">APEX <em>DETAIL</em></p>
+      <p class="gate-tagline">Luxury Car Detailing · By Appointment</p>
+    </div>
+    <p class="gate-detail-hint"><span class="gdh-dot"></span>Drag the car to detail it — spin to reveal the shine</p>
+    <button id="gate-trigger">ENTER APEX REGISTRY</button>
+  </div>
+</div>
+
+<!-- APP VIEWPORT STAGE -->
+<div class="app-viewport-stage">
+
 <!-- Mobile Nav -->
 <div class="mob-nav" id="mobNav">
   <button class="mob-close" onclick="closeMob()">✕</button>
@@ -1027,7 +1147,7 @@ footer {
 </div>
 
 <!-- NAV -->
-<nav id="nav">
+<nav id="nav" class="main-header gate-hidden">
   <a href="#" class="nav-logo">APEX <span>DETAIL</span></a>
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
@@ -1067,6 +1187,8 @@ footer {
     <div class="hero-scroll-ln"></div>
   </div>
 </section>
+
+</div><!-- /.app-viewport-stage -->
 
 <!-- STATS -->
 <div class="stats">
@@ -1131,7 +1253,7 @@ footer {
     <div class="svc-grid">
 
       <!-- Card 1: Signature Wash -->
-      <div class="svc-card reveal d1 active-stack-card">
+      <div class="svc-card reveal d1">
         <div class="card-inner">
           <div class="card-front">
             <div>
@@ -1515,22 +1637,6 @@ footer {
 
     </div>
 
-    <!-- Mobile card nav -->
-    <div class="svc-mob-nav" id="svcMobNav">
-      <button class="svc-mob-arr" id="svcPrevBtn" aria-label="Previous package">
-        <svg viewBox="0 0 16 16"><polyline points="10,2 4,8 10,14"/></svg>
-      </button>
-      <div class="svc-mob-dots" id="svcDots">
-        <button class="svc-mob-dot active" data-i="0" aria-label="Package 1"></button>
-        <button class="svc-mob-dot" data-i="1" aria-label="Package 2"></button>
-        <button class="svc-mob-dot" data-i="2" aria-label="Package 3"></button>
-        <button class="svc-mob-dot" data-i="3" aria-label="Package 4"></button>
-      </div>
-      <button class="svc-mob-arr" id="svcNextBtn" aria-label="Next package">
-        <svg viewBox="0 0 16 16"><polyline points="6,2 12,8 6,14"/></svg>
-      </button>
-    </div>
-
     <!-- Custom Job Card -->
     <div class="svc-custom reveal">
       <div class="svc-custom-text">
@@ -1764,32 +1870,6 @@ footer {
 </footer>
 
 <script>
-// ── Mobile Service Card Carousel ────────────
-(function(){
-  let svcIdx = 0;
-  function isMobile(){ return window.innerWidth <= 768; }
-  function svcGoTo(n){
-    const cards = document.querySelectorAll('.svc-grid .svc-card');
-    const dots  = document.querySelectorAll('#svcDots .svc-mob-dot');
-    if(!cards.length) return;
-    svcIdx = (n + cards.length) % cards.length;
-    cards.forEach((c,i) => c.classList.toggle('active-stack-card', i===svcIdx));
-    dots.forEach((d,i)  => d.classList.toggle('active', i===svcIdx));
-  }
-  document.getElementById('svcPrevBtn').addEventListener('click', ()=>{ if(isMobile()) svcGoTo(svcIdx-1); });
-  document.getElementById('svcNextBtn').addEventListener('click', ()=>{ if(isMobile()) svcGoTo(svcIdx+1); });
-  document.querySelectorAll('#svcDots .svc-mob-dot').forEach(d=>{
-    d.addEventListener('click', ()=>{ if(isMobile()) svcGoTo(+d.dataset.i); });
-  });
-  // re-apply on resize crossing the breakpoint
-  let wasMobile = isMobile();
-  window.addEventListener('resize', ()=>{
-    const now = isMobile();
-    if(now && !wasMobile){ svcGoTo(0); }
-    wasMobile = now;
-  });
-})();
-
 // ── Custom Cursor ───────────────────────────
 const cur = document.getElementById('cur');
 const ring = document.getElementById('ring');
@@ -1857,17 +1937,6 @@ function handleForm(e){
   },4500);
 }
 
-
-// ── Card flip ───────────────────────────────
-document.querySelectorAll('.svc-card').forEach(card=>{
-  card.addEventListener('click',e=>{
-    if(e.target.closest('a,.card-back-close')) return;
-    card.classList.toggle('flipped');
-  });
-  card.querySelector('.card-back-close')?.addEventListener('click',()=>{
-    card.classList.remove('flipped');
-  });
-});
 
 // ── Portfolio Modal ─────────────────────────
 const portfolioData = {
@@ -1979,6 +2048,22 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth'}); }
   });
 });
+
+// ── Registry Gate trigger ─────────────────────
+(function () {
+  const trigger = document.getElementById('gate-trigger');
+  if (!trigger) return;
+  function unlock() {
+    if (document.body.classList.contains('gate-unlocked')) return;
+    document.body.classList.add('gate-unlocked');
+    window.dispatchEvent(new Event('gate-unlock'));
+    setTimeout(() => {
+      document.querySelector('.main-header')?.classList.remove('gate-hidden');
+    }, 2800);
+  }
+  trigger.addEventListener('click', unlock);
+  trigger.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') unlock(); });
+})();
 </script>
 
 <div id="bio-modal" class="portfolio-modal" aria-hidden="true">
@@ -2047,5 +2132,274 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     </div>
   </div>
 </div>
+
+<!-- ── GATE THREE.JS 3D CAR ──────────────────────────── -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+
+const canvas = document.getElementById('gate-canvas');
+if (!canvas) { /* no-op if element missing */ }
+else {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.65;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x050505);
+
+  const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0.4, 0.55, 6.2);
+  camera.lookAt(0, 0.25, 0);
+
+  /* Studio lighting — copied from Registry */
+  scene.add(new THREE.AmbientLight(0x0a0a10, 0.4));
+  const topLight = new THREE.DirectionalLight(0xf0f4ff, 3.2);
+  topLight.position.set(0, 14, 2);
+  scene.add(topLight);
+  const stripLeft = new THREE.DirectionalLight(0xe8f0ff, 1.8);
+  stripLeft.position.set(-8, 4, 0);
+  scene.add(stripLeft);
+  const stripRight = new THREE.DirectionalLight(0xfff8ee, 1.4);
+  stripRight.position.set(8, 4, 0);
+  scene.add(stripRight);
+  const rimLight = new THREE.DirectionalLight(0xc8d8ff, 2.6);
+  rimLight.position.set(0, 3, -8);
+  scene.add(rimLight);
+  const frontFill = new THREE.DirectionalLight(0xfff5e0, 0.5);
+  frontFill.position.set(0, -2, 6);
+  scene.add(frontFill);
+  scene.add(new THREE.HemisphereLight(0x222028, 0x080808, 0.6));
+
+  /* HDR environment — PMREM-processed for true blurred reflections */
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  const applyEnv = hdr => {
+    const envRT = pmrem.fromEquirectangular(hdr);
+    scene.environment = envRT.texture;
+    hdr.dispose();
+  };
+  const rgbe = new RGBELoader();
+  rgbe.load(
+    'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr',
+    applyEnv,
+    undefined,
+    () => rgbe.load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/evening_road_01_1k.hdr', applyEnv)
+  );
+
+  /* ── Procedural grime texture (white = dirt, black = clean paint) ── */
+  function makeDirtTexture() {
+    const S = 512;
+    const c = document.createElement('canvas'); c.width = c.height = S;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, S, S);
+    /* fine dusty film */
+    const img = ctx.getImageData(0, 0, S, S);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const n = Math.random();
+      const v = n < 0.55 ? 0 : (n - 0.55) * 2 * 90;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    /* mud / water-spot splatter */
+    ctx.globalCompositeOperation = 'lighter';
+    for (let k = 0; k < 320; k++) {
+      const x = Math.random() * S, y = Math.random() * S;
+      const r = Math.random() * Math.random() * 26 + 1;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      const a = Math.random() * 0.55 + 0.18;
+      g.addColorStop(0, `rgba(255,255,255,${a})`);
+      g.addColorStop(0.6, `rgba(255,255,255,${a * 0.35})`);
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+    }
+    /* heavier grime pooling toward the lower body */
+    const grad = ctx.createLinearGradient(0, 0, 0, S);
+    grad.addColorStop(0, 'rgba(255,255,255,0)');
+    grad.addColorStop(0.55, 'rgba(255,255,255,0.05)');
+    grad.addColorStop(1, 'rgba(255,255,255,0.4)');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, S, S);
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+  const dirtTex = makeDirtTexture();
+  const cleanUniform = { value: 0 };   /* 0 = filthy, 1 = showroom-clean (shared) */
+
+  /* Inject grime that wipes away as the car is spun (uClean 0→1).
+     Triplanar object-space projection so it works on untextured paint. */
+  function applyGrime(m) {
+    m.onBeforeCompile = shader => {
+      shader.uniforms.uDirtMap = { value: dirtTex };
+      shader.uniforms.uClean   = cleanUniform;
+      shader.vertexShader = 'varying vec3 vGrimePos;\nvarying vec3 vGrimeNrm;\n' + shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        '#include <begin_vertex>\n  vGrimePos = position;'
+      );
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <beginnormal_vertex>',
+        '#include <beginnormal_vertex>\n  vGrimeNrm = objectNormal;'
+      );
+      shader.fragmentShader =
+        'varying vec3 vGrimePos;\nvarying vec3 vGrimeNrm;\n' +
+        'uniform sampler2D uDirtMap;\nuniform float uClean;\n' +
+        'float grimeAmt(){\n' +
+        '  vec3 bw = pow(abs(normalize(vGrimeNrm)), vec3(4.0));\n' +
+        '  bw /= (bw.x + bw.y + bw.z + 1e-4);\n' +
+        '  float s = 0.85;\n' +
+        '  float gx = texture2D(uDirtMap, vGrimePos.zy * s).r;\n' +
+        '  float gy = texture2D(uDirtMap, vGrimePos.xz * s).r;\n' +
+        '  float gz = texture2D(uDirtMap, vGrimePos.xy * s).r;\n' +
+        '  float g = gx*bw.x + gy*bw.y + gz*bw.z;\n' +
+        '  g += smoothstep(0.0, -0.6, vGrimePos.y) * 0.35;\n' + /* extra mud low on body */
+        '  return clamp(g * (1.0 - uClean) * 1.7, 0.0, 1.0);\n' +
+        '}\n' +
+        shader.fragmentShader;
+      /* darken + desaturate paint where grime sits */
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <color_fragment>',
+        `#include <color_fragment>
+         float dGrime = grimeAmt();
+         vec3 mud = vec3(0.085, 0.07, 0.055);
+         diffuseColor.rgb = mix(diffuseColor.rgb, mud, dGrime * 0.85);`
+      );
+      /* grime is matte — kill the reflections where it sits */
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <roughnessmap_fragment>',
+        `#include <roughnessmap_fragment>
+         roughnessFactor = mix(roughnessFactor, 0.95, grimeAmt());`
+      );
+    };
+    m.needsUpdate = true;
+  }
+
+  /* ── Soft contact shadow under the car ── */
+  function makeShadowTexture() {
+    const S = 256;
+    const c = document.createElement('canvas'); c.width = c.height = S;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    g.addColorStop(0, 'rgba(0,0,0,0.7)');
+    g.addColorStop(0.45, 'rgba(0,0,0,0.35)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+    return new THREE.CanvasTexture(c);
+  }
+  const shadowPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(6.4, 3.4),
+    new THREE.MeshBasicMaterial({ map: makeShadowTexture(), transparent: true, depthWrite: false, opacity: 0.6 })
+  );
+  shadowPlane.rotation.x = -Math.PI / 2;
+  shadowPlane.position.y = 0.002;
+  scene.add(shadowPlane);
+
+  /* Load car model */
+  let car = null;
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+  const loader = new GLTFLoader();
+  loader.setDRACOLoader(dracoLoader);
+  loader.load(
+    'https://threejs.org/examples/models/gltf/ferrari.glb',
+    gltf => {
+      car = gltf.scene;
+      const box    = new THREE.Box3().setFromObject(car);
+      const center = box.getCenter(new THREE.Vector3());
+      const size   = box.getSize(new THREE.Vector3());
+      const scale  = 5.2 / Math.max(size.x, size.y, size.z);
+      car.scale.setScalar(scale);
+      car.position.x = -center.x * scale;
+      car.position.y = -box.min.y * scale;   /* bottom sits at y=0 */
+      car.position.z = -center.z * scale;
+      /* Real materials — the stock GLB ships flat paint; upgrade to glossy
+         clearcoat car-paint + real transmissive glass + chrome rims. */
+      const paint = new THREE.MeshPhysicalMaterial({
+        color: 0xb01516, metalness: 0.85, roughness: 0.32,
+        clearcoat: 1.0, clearcoatRoughness: 0.045, envMapIntensity: 2.2
+      });
+      const glass = new THREE.MeshPhysicalMaterial({
+        color: 0x111418, metalness: 0.0, roughness: 0.06,
+        transmission: 0.9, transparent: true, opacity: 0.55,
+        ior: 1.45, envMapIntensity: 2.0
+      });
+      const chrome = new THREE.MeshStandardMaterial({
+        color: 0xeceff3, metalness: 1.0, roughness: 0.18, envMapIntensity: 2.4
+      });
+      const setMat = (name, mat) => { const o = car.getObjectByName(name); if (o) o.material = mat; };
+      setMat('body', paint);
+      setMat('glass', glass);
+      ['rim_fl', 'rim_fr', 'rim_rl', 'rim_rr'].forEach(n => setMat(n, chrome));
+
+      car.traverse(child => {
+        if (!child.isMesh || !child.material) return;
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(m => {
+          if (m.envMapIntensity === undefined || m.envMapIntensity < 1.5) m.envMapIntensity = 2.0;
+          applyGrime(m);
+        });
+      });
+      scene.add(car);
+    }
+  );
+
+  /* Drag-to-rotate — and every degree spun "details" the car cleaner */
+  let isDragging = false, prevX = 0, rotY = Math.PI * 1.1, rotVel = 0, spin = 0;
+  const CLEAN_TARGET = 17;   /* radians of spin to reach showroom-clean (~2.7 turns) */
+  canvas.style.cursor = 'grab';
+  canvas.addEventListener('pointerdown', e => {
+    isDragging = true; prevX = e.clientX; canvas.style.cursor = 'grabbing';
+    canvas.setPointerCapture?.(e.pointerId);
+  });
+  window.addEventListener('pointerup', () => { isDragging = false; canvas.style.cursor = 'grab'; });
+  window.addEventListener('pointermove', e => {
+    if (!isDragging || !car) return;
+    const dx = e.clientX - prevX; prevX = e.clientX;
+    rotVel = dx * 0.01;
+    rotY  += rotVel;
+    spin  += Math.abs(rotVel);
+  });
+
+  /* Render loop */
+  (function animate() {
+    requestAnimationFrame(animate);
+    if (car) {
+      if (!isDragging) {
+        rotVel *= 0.95;
+        spin   += Math.abs(rotVel);          /* momentum keeps cleaning */
+        rotY   += 0.0018 + rotVel;            /* gentle idle drift */
+      }
+      car.rotation.y = rotY;
+      cleanUniform.value = Math.min(1, spin / CLEAN_TARGET);
+    }
+    renderer.render(scene, camera);
+  })();
+
+  /* Resize */
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  /* Stop rendering once gate is unlocked to save GPU */
+  window.addEventListener('gate-unlock', () => {
+    setTimeout(() => renderer.dispose(), 2000);
+  });
+}
+</script>
 </body>
 </html>
