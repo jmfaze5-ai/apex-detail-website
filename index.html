@@ -177,22 +177,34 @@ nav.stuck {
 /* ── REGISTRY GATE CURTAIN ───────────────────── */
 .registry-gate-curtain {
   position:fixed; inset:0; z-index:9999;
-  background:#050505;
+  width:100vw; height:100vh;
+  overflow:hidden;
+  box-sizing:border-box;
+  /* strict three-row matrix: header · car stage · actions */
+  display:flex; flex-direction:column;
+  justify-content:space-between; align-items:center;
+  padding:8vh 0;
+  /* clean, moody studio void — a soft pool of light on the floor fading to black */
+  background:
+    radial-gradient(ellipse 95% 62% at 50% 80%, #1b1b1f 0%, #0c0c0e 46%, #040405 100%);
   transition:transform 1.8s cubic-bezier(0.16,1,0.3,1);
   will-change:transform;
-  overflow:hidden;
+}
+/* middle row — grows to fill the space between header and actions, car centered */
+.gate-stage {
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+  position:relative;
+  display:flex; align-items:center; justify-content:center;
 }
 #gate-canvas {
-  position:absolute; inset:0;
-  width:100%; height:100%;
   display:block;
-  z-index:0;
+  width:100%; height:100%;
+  cursor:grab;
+  touch-action:none;
 }
-.gate-bottom-grad {
-  position:absolute; bottom:0; left:0; right:0; height:45%;
-  background:linear-gradient(to top, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.6) 45%, transparent 100%);
-  z-index:1; pointer-events:none;
-}
+#gate-canvas.is-grabbing { cursor:grabbing; }
 .gate-detail-hint {
   display:flex; align-items:center; gap:.55em;
   margin:0 0 22px; font-size:.66rem; font-weight:500;
@@ -212,24 +224,20 @@ body.gate-unlocked .registry-gate-curtain {
   transform:translateY(-100vh);
   pointer-events:none;
 }
-.gate-overlay {
-  position:absolute; inset:0; z-index:2;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:flex-end;
-  padding-bottom:clamp(40px,7vh,80px);
-  pointer-events:none;
+.gate-bottom-actions {
+  display:flex; flex-direction:column; align-items:center;
+  width:100%; text-align:center;
 }
-.gate-overlay > * { pointer-events:auto; }
 .gate-logo {
-  font-family:var(--font-d); font-size:.78rem; font-weight:600;
-  letter-spacing:.42em; text-transform:uppercase;
+  font-family:var(--font-d); font-size:.82rem; font-weight:600;
+  letter-spacing:.5em; text-transform:uppercase;   /* spread elegantly across the top */
   color:#FFFFFF !important;
   text-shadow:0 2px 12px rgba(0,0,0,.95);
 }
 .gate-logo em { color:var(--gold); font-style:normal; }
 .gate-tagline {
-  font-family:var(--font-s); font-size:.95rem; font-weight:400; font-style:italic;
-  color:#F5F5F5 !important; letter-spacing:.04em; margin-top:6px;
+  font-family:var(--font-s); font-size:.9rem; font-weight:400; font-style:italic;
+  color:#F5F5F5 !important; letter-spacing:.15em; margin-top:10px;
   text-shadow:0 4px 12px rgba(0,0,0,0.9);
 }
 /* ── GATE CAR STAGE ──────────────────────────── */
@@ -302,7 +310,7 @@ body.gate-unlocked .registry-gate-curtain {
 }
 .gate-branding {
   display:flex; flex-direction:column; align-items:center;
-  margin:0 0 32px; pointer-events:auto;
+  margin:0; width:100%; text-align:center;   /* luxury lookbook header */
 }
 #gate-trigger {
   font-family:var(--font-d); font-size:.65rem; font-weight:600;
@@ -1121,14 +1129,15 @@ footer {
 
 <!-- REGISTRY GATE CURTAIN -->
 <div class="registry-gate-curtain">
-  <canvas id="gate-canvas"></canvas>
-  <div class="gate-bottom-grad"></div>
-  <div class="gate-overlay">
-    <div class="gate-branding">
-      <p class="gate-logo">APEX <em>DETAIL</em></p>
-      <p class="gate-tagline">Luxury Car Detailing · By Appointment</p>
-    </div>
-    <p class="gate-detail-hint"><span class="gdh-dot"></span>Drag the car to detail it — spin to reveal the shine</p>
+  <div class="gate-branding">
+    <p class="gate-logo">APEX <em>DETAIL</em></p>
+    <p class="gate-tagline">Luxury Car Detailing · By Appointment</p>
+  </div>
+  <div class="gate-stage">
+    <canvas id="gate-canvas"></canvas>
+  </div>
+  <div class="gate-bottom-actions">
+    <p class="gate-detail-hint"><span class="gdh-dot"></span>Drag to spin · Tap the car to detail it</p>
     <button id="gate-trigger">ENTER APEX REGISTRY</button>
   </div>
 </div>
@@ -2064,6 +2073,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   trigger.addEventListener('click', unlock);
   trigger.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') unlock(); });
 })();
+
 </script>
 
 <div id="bio-modal" class="portfolio-modal" aria-hidden="true">
@@ -2147,57 +2157,99 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 
 const canvas = document.getElementById('gate-canvas');
 if (!canvas) { /* no-op if element missing */ }
 else {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  const isMobile = window.matchMedia('(max-width: 768px)').matches
+                || ('ontouchstart' in window && window.innerWidth < 900);
+
+  /* the canvas now lives inside the centered middle stage row — size to IT */
+  const stage = canvas.parentElement;
+  const stageW = () => stage.clientWidth  || window.innerWidth;
+  const stageH = () => stage.clientHeight || window.innerHeight;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile, alpha: true, powerPreference: 'high-performance' });
+  renderer.setClearColor(0x000000, 0);   /* transparent — let the CSS studio void show through */
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.75 : 2));
+  renderer.setSize(stageW(), stageH());
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.65;
+  renderer.toneMappingExposure = 0.84;   /* cinematic contrast — stops the car glowing/floating */
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x050505);
+  scene.background = null;   /* transparent → the CSS studio-void gradient is the backdrop */
 
-  const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0.4, 0.55, 6.2);
-  camera.lookAt(0, 0.25, 0);
+  /* On phones the car sits a touch lower/closer so it fills the portrait frame */
+  const camera = new THREE.PerspectiveCamera(isMobile ? 46 : 40, stageW() / stageH(), 0.1, 100);
+  camera.position.set(isMobile ? 3.6 : 4.4, 1.45, isMobile ? 5.4 : 5.8);
+  const camTarget = new THREE.Vector3(0, 0.55, 0);
+  camera.lookAt(camTarget);
 
-  /* Studio lighting — copied from Registry */
-  scene.add(new THREE.AmbientLight(0x0a0a10, 0.4));
-  const topLight = new THREE.DirectionalLight(0xf0f4ff, 3.2);
-  topLight.position.set(0, 14, 2);
-  scene.add(topLight);
-  const stripLeft = new THREE.DirectionalLight(0xe8f0ff, 1.8);
-  stripLeft.position.set(-8, 4, 0);
-  scene.add(stripLeft);
-  const stripRight = new THREE.DirectionalLight(0xfff8ee, 1.4);
-  stripRight.position.set(8, 4, 0);
-  scene.add(stripRight);
-  const rimLight = new THREE.DirectionalLight(0xc8d8ff, 2.6);
-  rimLight.position.set(0, 3, -8);
+  /* Dark, controlled garage-shoot lighting: minimal ambient, a hard overhead
+     key that casts the grounding shadow, a back rim, and two side strip lights
+     raking across the flanks (mimics a pro photo-booth light setup). */
+  const keyLight = new THREE.DirectionalLight(0xeaf0ff, 2.0);   /* cool industrial white */
+  keyLight.position.set(3, 11, 5);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
+  keyLight.shadow.camera.near = 1;
+  keyLight.shadow.camera.far = 30;
+  keyLight.shadow.camera.left = -6;
+  keyLight.shadow.camera.right = 6;
+  keyLight.shadow.camera.top = 6;
+  keyLight.shadow.camera.bottom = -6;
+  keyLight.shadow.bias = -0.0004;
+  keyLight.shadow.radius = 5;
+  scene.add(keyLight);
+  const rimLight = new THREE.DirectionalLight(0xcfe0ff, 1.3);
+  rimLight.position.set(-6, 5, -6);
   scene.add(rimLight);
-  const frontFill = new THREE.DirectionalLight(0xfff5e0, 0.5);
-  frontFill.position.set(0, -2, 6);
-  scene.add(frontFill);
-  scene.add(new THREE.HemisphereLight(0x222028, 0x080808, 0.6));
+  /* side strip lights — long raking highlights down each flank */
+  const stripLeft = new THREE.DirectionalLight(0xeaf2ff, 1.1);
+  stripLeft.position.set(-9, 3.5, 1);
+  scene.add(stripLeft);
+  const stripRight = new THREE.DirectionalLight(0xeef2ff, 1.0);   /* matched cool white, no warm cast */
+  stripRight.position.set(9, 3.5, 1);
+  scene.add(stripRight);
+  scene.add(new THREE.AmbientLight(0xc8d2e0, 0.15));   /* deeper cabin shadows */
 
-  /* HDR environment — PMREM-processed for true blurred reflections */
+  /* A single sleek overhead strip light directly above the spine of the car —
+     narrow + intense so it lays ONE sharp brilliant highlight line down the red
+     hood while the rest of the body falls into moody studio shadow. */
+  RectAreaLightUniformsLib.init();
+  const stripBox = new THREE.RectAreaLight(0xf4f7ff, 26.0, 0.85, 9.0);   /* a touch wider → softer-edged streak */
+  stripBox.position.set(0, 6.6, 0);
+  stripBox.lookAt(0, 0, 0);
+  scene.add(stripBox);
+  /* a soft, low side wash purely to define the far flank edge — kept dim so it
+     never floods the open cabin / windshield */
+  const edgeBox = new THREE.RectAreaLight(0xdfe8ff, 2.2, 6.0, 1.6);
+  edgeBox.position.set(-3.5, 3.0, -2.0);
+  edgeBox.lookAt(0, 0.4, 0);
+  scene.add(edgeBox);
+
+  /* ── Studio HDRI used for REFLECTIONS ONLY (never shown as background). Clean
+        photo-studio softboxes give the paint crisp streaks with no warehouse
+        clutter reflected in the clear-coat. ── */
   const pmrem = new THREE.PMREMGenerator(renderer);
   pmrem.compileEquirectangularShader();
+  const HDRI_RES = isMobile ? '1k' : '2k';
   const applyEnv = hdr => {
+    hdr.mapping = THREE.EquirectangularReflectionMapping;
     const envRT = pmrem.fromEquirectangular(hdr);
-    scene.environment = envRT.texture;
+    scene.environment = envRT.texture;   /* reflections only — background stays the CSS void */
     hdr.dispose();
   };
   const rgbe = new RGBELoader();
   rgbe.load(
-    'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr',
+    `https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/${HDRI_RES}/brown_photostudio_02_${HDRI_RES}.hdr`,
     applyEnv,
     undefined,
-    () => rgbe.load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/evening_road_01_1k.hdr', applyEnv)
+    () => rgbe.load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr', applyEnv)
   );
 
   /* ── Procedural grime texture (white = dirt, black = clean paint) ── */
@@ -2216,11 +2268,11 @@ else {
     ctx.putImageData(img, 0, 0);
     /* mud / water-spot splatter */
     ctx.globalCompositeOperation = 'lighter';
-    for (let k = 0; k < 320; k++) {
+    for (let k = 0; k < 130; k++) {
       const x = Math.random() * S, y = Math.random() * S;
-      const r = Math.random() * Math.random() * 26 + 1;
+      const r = Math.random() * Math.random() * 18 + 1;
       const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      const a = Math.random() * 0.55 + 0.18;
+      const a = Math.random() * 0.3 + 0.1;
       g.addColorStop(0, `rgba(255,255,255,${a})`);
       g.addColorStop(0.6, `rgba(255,255,255,${a * 0.35})`);
       g.addColorStop(1, 'rgba(255,255,255,0)');
@@ -2265,8 +2317,8 @@ else {
         '  float gy = texture2D(uDirtMap, vGrimePos.xz * s).r;\n' +
         '  float gz = texture2D(uDirtMap, vGrimePos.xy * s).r;\n' +
         '  float g = gx*bw.x + gy*bw.y + gz*bw.z;\n' +
-        '  g += smoothstep(0.0, -0.6, vGrimePos.y) * 0.35;\n' + /* extra mud low on body */
-        '  return clamp(g * (1.0 - uClean) * 1.7, 0.0, 1.0);\n' +
+        '  g += smoothstep(0.0, -0.6, vGrimePos.y) * 0.2;\n' + /* light dust low on body */
+        '  return clamp(g * (1.0 - uClean) * 1.05, 0.0, 1.0);\n' +
         '}\n' +
         shader.fragmentShader;
       /* darken + desaturate paint where grime sits */
@@ -2274,8 +2326,8 @@ else {
         '#include <color_fragment>',
         `#include <color_fragment>
          float dGrime = grimeAmt();
-         vec3 mud = vec3(0.085, 0.07, 0.055);
-         diffuseColor.rgb = mix(diffuseColor.rgb, mud, dGrime * 0.85);`
+         vec3 mud = vec3(0.11, 0.095, 0.075);
+         diffuseColor.rgb = mix(diffuseColor.rgb, mud, dGrime * 0.6);`
       );
       /* grime is matte — kill the reflections where it sits */
       shader.fragmentShader = shader.fragmentShader.replace(
@@ -2287,25 +2339,74 @@ else {
     m.needsUpdate = true;
   }
 
-  /* ── Soft contact shadow under the car ── */
+  /* ── Static, high-performance contact shadow only. No reflective floor — a
+        clean matte dark surface where a soft dark pool grounds the tyres. ── */
+
+  /* ── Soft AO "blob" pool right under the chassis. Pitch-black core, tight
+        falloff — the single biggest anti-float cue. ── */
   function makeShadowTexture() {
     const S = 256;
     const c = document.createElement('canvas'); c.width = c.height = S;
     const ctx = c.getContext('2d');
+    /* anisotropic pool: wider than deep, like a car footprint */
     const g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
-    g.addColorStop(0, 'rgba(0,0,0,0.7)');
-    g.addColorStop(0.45, 'rgba(0,0,0,0.35)');
-    g.addColorStop(1, 'rgba(0,0,0,0)');
+    g.addColorStop(0,    'rgba(0,0,0,1.0)');
+    g.addColorStop(0.3,  'rgba(0,0,0,0.78)');
+    g.addColorStop(0.6,  'rgba(0,0,0,0.3)');
+    g.addColorStop(1,    'rgba(0,0,0,0)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
     return new THREE.CanvasTexture(c);
   }
+  /* The whole contact footprint lives in one group that spins WITH the car so
+     the pool + tyre prints stay locked under the wheels at every angle. */
+  const shadowGroup = new THREE.Group();
+  shadowGroup.renderOrder = 1;   /* occlusion draws over the floor reflection */
+  scene.add(shadowGroup);
+
   const shadowPlane = new THREE.Mesh(
-    new THREE.PlaneGeometry(6.4, 3.4),
-    new THREE.MeshBasicMaterial({ map: makeShadowTexture(), transparent: true, depthWrite: false, opacity: 0.6 })
+    new THREE.PlaneGeometry(2.2, 4.0),   /* tighter footprint, hugs the chassis */
+    new THREE.MeshBasicMaterial({ map: makeShadowTexture(), transparent: true, depthWrite: false, opacity: 1.0 })
   );
   shadowPlane.rotation.x = -Math.PI / 2;
-  shadowPlane.position.y = 0.002;
-  scene.add(shadowPlane);
+  shadowPlane.position.y = 0.001;
+  shadowGroup.add(shadowPlane);
+
+  /* ── Four tight, very dark contact patches exactly where each tyre meets the
+        concrete — the heavily-occluded "tyre print" that locks it to the floor. ── */
+  const tirePatchTex = (() => {
+    const S = 128;
+    const c = document.createElement('canvas'); c.width = c.height = S;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(S/2, S/2, 0, S/2, S/2, S/2);
+    g.addColorStop(0,    'rgba(0,0,0,1.0)');   /* solid black core — rubber meets floor */
+    g.addColorStop(0.45, 'rgba(0,0,0,1.0)');   /* hold pure black through the contact patch */
+    g.addColorStop(0.78, 'rgba(0,0,0,0.45)');  /* then a tight, fast falloff */
+    g.addColorStop(1,    'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+    return new THREE.CanvasTexture(c);
+  })();
+  const tirePatchMat = new THREE.MeshBasicMaterial({ map: tirePatchTex, transparent: true, depthWrite: false, opacity: 1.0 });
+  /* approx wheel footprints for the scaled Ferrari (x = track, z = wheelbase) */
+  [[-0.82, 1.28], [0.82, 1.28], [-0.82, -1.28], [0.82, -1.28]].forEach(([px, pz]) => {
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), tirePatchMat);
+    p.rotation.x = -Math.PI / 2;
+    p.position.set(px, 0.003, pz);
+    shadowGroup.add(p);
+  });
+
+  /* ── Real shadow-catcher floor: a transparent plane that only renders the
+        cast shadow, grounding the car on the garage floor. ── */
+  const shadowCatcher = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 40),
+    new THREE.ShadowMaterial({ opacity: 0.85, color: 0x05070b })   /* deep, rich grounding shadow */
+  );
+  shadowCatcher.rotation.x = -Math.PI / 2;
+  shadowCatcher.position.y = 0;
+  shadowCatcher.receiveShadow = true;
+  scene.add(shadowCatcher);
+
+  /* The visible garage (floor, walls, lighting rigs, tool carts) all come
+     from the autoshop_01 HDRI panorama — no procedural geometry needed. */
 
   /* Load car model */
   let car = null;
@@ -2320,84 +2421,159 @@ else {
       const box    = new THREE.Box3().setFromObject(car);
       const center = box.getCenter(new THREE.Vector3());
       const size   = box.getSize(new THREE.Vector3());
-      const scale  = 5.2 / Math.max(size.x, size.y, size.z);
+      const scale  = 3.75 / Math.max(size.x, size.y, size.z);   /* ~28% smaller, sits centered */
       car.scale.setScalar(scale);
       car.position.x = -center.x * scale;
       car.position.y = -box.min.y * scale;   /* bottom sits at y=0 */
       car.position.z = -center.z * scale;
-      /* Real materials — the stock GLB ships flat paint; upgrade to glossy
-         clearcoat car-paint + real transmissive glass + chrome rims. */
+      /* Pristine ceramic-coated supercar: uniform mirror clear-coat, NO maps so
+         the paint never reads wrinkled/mottled. Lower envMapIntensity keeps the
+         studio reflection clean rather than crumpling across the body facets. */
       const paint = new THREE.MeshPhysicalMaterial({
-        color: 0xb01516, metalness: 0.85, roughness: 0.32,
-        clearcoat: 1.0, clearcoatRoughness: 0.045, envMapIntensity: 2.2
+        color: 0x990000, metalness: 0.9, roughness: 0.1,
+        clearcoat: 1.0, clearcoatRoughness: 0.05, envMapIntensity: 1.0   /* faint clearcoat blur melts the highlight edges */
       });
+      paint.map = null; paint.normalMap = null; paint.roughnessMap = null;
+      paint.metalnessMap = null; paint.aoMap = null; paint.bumpMap = null;
       const glass = new THREE.MeshPhysicalMaterial({
-        color: 0x111418, metalness: 0.0, roughness: 0.06,
-        transmission: 0.9, transparent: true, opacity: 0.55,
-        ior: 1.45, envMapIntensity: 2.0
+        color: 0x0a0c0f, metalness: 0.0, roughness: 0.08,
+        transmission: 0.85, transparent: true, opacity: 0.6,
+        ior: 1.45, envMapIntensity: 0.9   /* dark/smoky — no white blow-out */
       });
+      /* metallic silver rims — mid-grey + tamed env so they stop glowing white */
       const chrome = new THREE.MeshStandardMaterial({
-        color: 0xeceff3, metalness: 1.0, roughness: 0.18, envMapIntensity: 2.4
+        color: 0x888888, metalness: 1.0, roughness: 0.2, envMapIntensity: 1.0
+      });
+      /* dark matte charcoal rubber */
+      const rubber = new THREE.MeshStandardMaterial({
+        color: 0x1a1a1a, metalness: 0.1, roughness: 0.8, envMapIntensity: 0.25
       });
       const setMat = (name, mat) => { const o = car.getObjectByName(name); if (o) o.material = mat; };
       setMat('body', paint);
       setMat('glass', glass);
-      ['rim_fl', 'rim_fr', 'rim_rl', 'rim_rr'].forEach(n => setMat(n, chrome));
+      ['rim_fl', 'rim_fr', 'rim_rl', 'rim_rr', 'wheel', 'wheel_1', 'wheel_2', 'wheel_3'].forEach(n => setMat(n, chrome));
 
+      const tuned = new Set();   /* materials are shared across meshes — tune each once */
+      const tuneMat = m => {
+        if (m === paint || m === glass || m === chrome) return m;
+        if (m.name === 'Tires') return rubber;            /* all 4 tyres + grills/wipers */
+        if (tuned.has(m)) return m;
+        tuned.add(m);
+        /* interior trim / leather / carpet were washing out white — darken &
+           kill their reflections so the cabin reads as deep moody shadow */
+        if (/Leather|Carpet|Interior|plastic|Glass_Gray|Carbon/.test(m.name || '')) {
+          if (m.color) m.color.multiplyScalar(0.4);
+          m.envMapIntensity = 0.18;
+          m.roughness = Math.max(m.roughness ?? 0.8, 0.7);
+        } else {
+          m.envMapIntensity = 0.5;                        /* tame reflections; only paint mirrors */
+        }
+        return m;
+      };
       car.traverse(child => {
         if (!child.isMesh || !child.material) return;
-        const mats = Array.isArray(child.material) ? child.material : [child.material];
-        mats.forEach(m => {
-          if (m.envMapIntensity === undefined || m.envMapIntensity < 1.5) m.envMapIntensity = 2.0;
-          applyGrime(m);
-        });
+        child.castShadow = true;
+        child.material = Array.isArray(child.material)
+          ? child.material.map(tuneMat)
+          : tuneMat(child.material);
       });
+      applyGrime(paint);   /* grime only sweeps the exterior paint */
+      car.rotation.y = rotY;
       scene.add(car);
     }
   );
 
-  /* Drag-to-rotate — and every degree spun "details" the car cleaner */
-  let isDragging = false, prevX = 0, rotY = Math.PI * 1.1, rotVel = 0, spin = 0;
-  const CLEAN_TARGET = 17;   /* radians of spin to reach showroom-clean (~2.7 turns) */
-  canvas.style.cursor = 'grab';
-  canvas.addEventListener('pointerdown', e => {
-    isDragging = true; prevX = e.clientX; canvas.style.cursor = 'grabbing';
-    canvas.setPointerCapture?.(e.pointerId);
-  });
-  window.addEventListener('pointerup', () => { isDragging = false; canvas.style.cursor = 'grab'; });
-  window.addEventListener('pointermove', e => {
-    if (!isDragging || !car) return;
-    const dx = e.clientX - prevX; prevX = e.clientX;
-    rotVel = dx * 0.01;
-    rotY  += rotVel;
-    spin  += Math.abs(rotVel);
+  /* ── State: car loads DIRTY (the "before"); tap to detail it to showroom-
+        clean, tap again to dirty it back. ── */
+  let rotY = Math.PI * 0.82;     /* opening 3/4 hero angle */
+  cleanUniform.value = 0;        /* 0 = dirty / not detailed yet */
+  let cleanTarget = 0;           /* tap toggles 0 ⇄ 1 */
+
+  /* ── Drag to spin (mouse + touch) with inertial spin-down ── */
+  const DRAG_SENS = 0.001024;    /* another 20% slower — heavy, silk-like spin */
+  let dragging = false, lastX = 0, dragVel = 0, autoSpin = 0.0004;
+  let downX = 0, downY = 0, moved = 0;
+
+  function pointerDown(x, y) {
+    dragging = true; lastX = x; downX = x; downY = y; moved = 0;
+    dragVel = 0;
+    canvas.classList.add('is-grabbing');
+  }
+  function pointerMove(x, y) {
+    if (!dragging) return;
+    const dx = x - lastX;
+    lastX = x;
+    moved = Math.max(moved, Math.abs(x - downX) + Math.abs(y - downY));
+    rotY += dx * DRAG_SENS;
+    /* smooth the tracked velocity so the release flick isn't a single-frame spike */
+    dragVel = dragVel * 0.7 + (dx * DRAG_SENS) * 0.3;
+  }
+  function pointerUp() {
+    if (!dragging) return;
+    dragging = false;
+    canvas.classList.remove('is-grabbing');
+  }
+
+  canvas.addEventListener('mousedown', e => pointerDown(e.clientX, e.clientY));
+  window.addEventListener('mousemove', e => pointerMove(e.clientX, e.clientY));
+  window.addEventListener('mouseup',   pointerUp);
+  canvas.addEventListener('touchstart', e => { const t = e.touches[0]; pointerDown(t.clientX, t.clientY); }, { passive: true });
+  canvas.addEventListener('touchmove',  e => { const t = e.touches[0]; pointerMove(t.clientX, t.clientY); }, { passive: true });
+  canvas.addEventListener('touchend',   pointerUp);
+
+  /* ── Tap the car → toggle dirty ⇄ clean (raycast, ignore drags) ── */
+  const raycaster = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  function tryDetail(x, y) {
+    if (!car || moved > 8) return;            /* it was a drag, not a tap */
+    const rect = canvas.getBoundingClientRect();
+    ndc.x =  ((x - rect.left) / rect.width)  * 2 - 1;
+    ndc.y = -((y - rect.top)  / rect.height) * 2 + 1;
+    raycaster.setFromCamera(ndc, camera);
+    if (raycaster.intersectObject(car, true).length) {
+      cleanTarget = cleanTarget > 0.5 ? 0 : 1;
+    }
+  }
+  canvas.addEventListener('click', e => tryDetail(e.clientX, e.clientY));
+  canvas.addEventListener('touchend', e => {
+    const t = e.changedTouches[0]; if (t) tryDetail(t.clientX, t.clientY);
   });
 
   /* Render loop */
+  let running = true;
   (function animate() {
+    if (!running) return;
     requestAnimationFrame(animate);
     if (car) {
-      if (!isDragging) {
-        rotVel *= 0.95;
-        spin   += Math.abs(rotVel);          /* momentum keeps cleaning */
-        rotY   += 0.0018 + rotVel;            /* gentle idle drift */
+      if (!dragging) {
+        /* buttery damped glide: long exponential ease-out settles the car to a
+           cushioned stop, then eases back into the slow idle turntable spin */
+        dragVel *= 0.96;   /* ≈ dampingFactor 0.04 — heavy, buttery glide-to-stop */
+        if (Math.abs(dragVel) < 0.00002) dragVel = 0;
+        rotY += autoSpin + dragVel;
       }
       car.rotation.y = rotY;
-      cleanUniform.value = Math.min(1, spin / CLEAN_TARGET);
+      shadowGroup.rotation.y = rotY;   /* contact footprint tracks the wheels */
+      cleanUniform.value += (cleanTarget - cleanUniform.value) * 0.045;  /* smooth detail sweep */
     }
     renderer.render(scene, camera);
   })();
 
-  /* Resize */
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+  /* Resize — always fit the centered stage container exactly */
+  function fitStage() {
+    const w = stageW(), h = stageH();
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+    renderer.setSize(w, h);
+  }
+  window.addEventListener('resize', fitStage);
+  /* re-fit after first layout/font settle so it never starts clipped or offset */
+  requestAnimationFrame(fitStage);
+  window.addEventListener('load', fitStage);
 
   /* Stop rendering once gate is unlocked to save GPU */
   window.addEventListener('gate-unlock', () => {
-    setTimeout(() => renderer.dispose(), 2000);
+    setTimeout(() => { running = false; renderer.dispose(); }, 2000);
   });
 }
 </script>
