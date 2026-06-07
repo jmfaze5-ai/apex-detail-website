@@ -197,6 +197,7 @@ nav.stuck {
   width:100%;
   position:relative;
   display:flex; align-items:center; justify-content:center;
+  touch-action:none;   /* no page rubber-band/scroll while spinning the car */
 }
 #gate-canvas {
   display:block;
@@ -1095,6 +1096,21 @@ footer {
   nav.stuck { padding:12px 24px; }
   .gate-3d-stage { max-width:94vw; margin-bottom:18px; }
   .hero { min-height:720px; }
+
+  /* ── Mobile gate: compress the 3D footprint, lift the CTA clear of the
+        browser/OS navigation handles ──────────────────────────────── */
+  .registry-gate-curtain {
+    justify-content:space-between;
+    padding:5vh 0 0;            /* header breathes at top, button gets its own margin */
+  }
+  .gate-stage {
+    flex:0 0 auto;             /* don't let it eat the whole screen */
+    height:40vh;               /* strict, compact 3D footprint */
+  }
+  .gate-bottom-actions {
+    margin-bottom:40px !important;   /* clear of iOS/Android nav handles */
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
   .nav-links,.nav-cta { display:none; }
   .nav-ham { display:flex; }
   .container { padding:0 24px; }
@@ -2523,21 +2539,27 @@ else {
 
   /* ── Tap the car → toggle dirty ⇄ clean (raycast, ignore drags) ── */
   const raycaster = new THREE.Raycaster();
+  if (isMobile) raycaster.params.Mesh.threshold = 0.5;   /* forgiving thumb target */
   const ndc = new THREE.Vector2();
+  const _hitBox = new THREE.Box3();
   function tryDetail(x, y) {
-    if (!car || moved > 8) return;            /* it was a drag, not a tap */
+    const tol = isMobile ? 14 : 8;            /* a tap drifts more on a thumb */
+    if (!car || moved > tol) return;          /* it was a drag, not a tap */
     const rect = canvas.getBoundingClientRect();
     ndc.x =  ((x - rect.left) / rect.width)  * 2 - 1;
     ndc.y = -((y - rect.top)  / rect.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    if (raycaster.intersectObject(car, true).length) {
-      cleanTarget = cleanTarget > 0.5 ? 0 : 1;
+    let hit = raycaster.intersectObject(car, true).length > 0;
+    if (!hit && isMobile) {                   /* fallback: whole car volume, easy for thumbs */
+      _hitBox.setFromObject(car);
+      hit = raycaster.ray.intersectsBox(_hitBox);
     }
+    if (hit) cleanTarget = cleanTarget > 0.5 ? 0 : 1;
   }
   canvas.addEventListener('click', e => tryDetail(e.clientX, e.clientY));
   canvas.addEventListener('touchend', e => {
     const t = e.changedTouches[0]; if (t) tryDetail(t.clientX, t.clientY);
-  });
+  }, { passive: true });
 
   /* Render loop */
   let running = true;
