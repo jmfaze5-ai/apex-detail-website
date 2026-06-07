@@ -44,6 +44,7 @@ body {
 body:not(.gate-unlocked) {
   overflow:hidden;
   height:100vh;
+  height:100dvh;
   touch-action:none;
   overscroll-behavior:none;
 }
@@ -186,6 +187,7 @@ nav.stuck {
 .registry-gate-curtain {
   position:fixed; inset:0; z-index:9999;
   width:100vw; height:100vh;
+  height:100dvh;   /* excludes the mobile browser toolbar so the CTA never hides behind it */
   overflow:hidden;
   box-sizing:border-box;
   overscroll-behavior:none;
@@ -1110,15 +1112,15 @@ footer {
         browser/OS navigation handles ──────────────────────────────── */
   .registry-gate-curtain {
     justify-content:space-between;
-    padding:5vh 0 0;            /* header breathes at top, button gets its own margin */
+    padding:4vh 0 0;           /* header breathes at top, button gets its own margin */
   }
   .gate-stage {
     flex:0 0 auto;             /* don't let it eat the whole screen */
     height:46vh;               /* compact footprint, car still reads big */
   }
   .gate-bottom-actions {
-    margin-bottom:40px !important;   /* clear of iOS/Android nav handles */
-    padding-bottom:env(safe-area-inset-bottom, 0px);
+    /* sit well clear of the mobile browser toolbar / home indicator */
+    margin-bottom:calc(7vh + env(safe-area-inset-bottom, 0px)) !important;
   }
   .nav-links,.nav-cta { display:none; }
   .nav-ham { display:flex; }
