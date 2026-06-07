@@ -39,6 +39,14 @@ body {
   overflow-x:hidden;
   cursor:none;
 }
+/* Lock the page completely behind the gate until the user enters — no scroll,
+   no peeking the site, no mobile rubber-band. Released on unlock. */
+body:not(.gate-unlocked) {
+  overflow:hidden;
+  height:100vh;
+  touch-action:none;
+  overscroll-behavior:none;
+}
 
 /* Grain */
 body::after {
@@ -180,6 +188,7 @@ nav.stuck {
   width:100vw; height:100vh;
   overflow:hidden;
   box-sizing:border-box;
+  overscroll-behavior:none;
   /* strict three-row matrix: header · car stage · actions */
   display:flex; flex-direction:column;
   justify-content:space-between; align-items:center;
@@ -1105,7 +1114,7 @@ footer {
   }
   .gate-stage {
     flex:0 0 auto;             /* don't let it eat the whole screen */
-    height:40vh;               /* strict, compact 3D footprint */
+    height:46vh;               /* compact footprint, car still reads big */
   }
   .gate-bottom-actions {
     margin-bottom:40px !important;   /* clear of iOS/Android nav handles */
@@ -2201,7 +2210,7 @@ else {
 
   /* On phones the car sits a touch lower/closer so it fills the portrait frame */
   const camera = new THREE.PerspectiveCamera(isMobile ? 46 : 40, stageW() / stageH(), 0.1, 100);
-  camera.position.set(isMobile ? 3.6 : 4.4, 1.45, isMobile ? 5.4 : 5.8);
+  camera.position.set(isMobile ? 3.1 : 4.4, 1.4, isMobile ? 4.7 : 5.8);   /* mobile: closer = bigger car */
   const camTarget = new THREE.Vector3(0, 0.55, 0);
   camera.lookAt(camTarget);
 
@@ -2333,23 +2342,23 @@ else {
         '  float gy = texture2D(uDirtMap, vGrimePos.xz * s).r;\n' +
         '  float gz = texture2D(uDirtMap, vGrimePos.xy * s).r;\n' +
         '  float g = gx*bw.x + gy*bw.y + gz*bw.z;\n' +
-        '  g += smoothstep(0.0, -0.6, vGrimePos.y) * 0.2;\n' + /* light dust low on body */
-        '  return clamp(g * (1.0 - uClean) * 1.05, 0.0, 1.0);\n' +
+        '  g += smoothstep(0.0, -0.6, vGrimePos.y) * 0.32;\n' + /* heavier dust low on body */
+        '  return clamp(g * (1.0 - uClean) * 1.55, 0.0, 1.0);\n' +
         '}\n' +
         shader.fragmentShader;
-      /* darken + desaturate paint where grime sits */
+      /* darken + desaturate paint where grime sits — clearly dusty "before" */
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <color_fragment>',
         `#include <color_fragment>
          float dGrime = grimeAmt();
-         vec3 mud = vec3(0.11, 0.095, 0.075);
-         diffuseColor.rgb = mix(diffuseColor.rgb, mud, dGrime * 0.6);`
+         vec3 mud = vec3(0.13, 0.115, 0.092);
+         diffuseColor.rgb = mix(diffuseColor.rgb, mud, dGrime * 0.85);`
       );
-      /* grime is matte — kill the reflections where it sits */
+      /* grime is matte — fully kill the gloss where it sits so the detail reveal pops */
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <roughnessmap_fragment>',
         `#include <roughnessmap_fragment>
-         roughnessFactor = mix(roughnessFactor, 0.95, grimeAmt());`
+         roughnessFactor = mix(roughnessFactor, 1.0, grimeAmt());`
       );
     };
     m.needsUpdate = true;
@@ -2556,10 +2565,18 @@ else {
     }
     if (hit) cleanTarget = cleanTarget > 0.5 ? 0 : 1;
   }
-  canvas.addEventListener('click', e => tryDetail(e.clientX, e.clientY));
+  /* A touch fires touchend AND a synthesized click ~300ms later. Without this
+     guard tryDetail runs twice and toggles the car straight back — looking like
+     the tap did nothing. Swallow the trailing click after any touch. */
+  let lastTouchAt = 0;
   canvas.addEventListener('touchend', e => {
+    lastTouchAt = Date.now();
     const t = e.changedTouches[0]; if (t) tryDetail(t.clientX, t.clientY);
   }, { passive: true });
+  canvas.addEventListener('click', e => {
+    if (Date.now() - lastTouchAt < 700) return;   /* trailing synthetic click — ignore */
+    tryDetail(e.clientX, e.clientY);
+  });
 
   /* Render loop */
   let running = true;
@@ -2576,7 +2593,7 @@ else {
       }
       car.rotation.y = rotY;
       shadowGroup.rotation.y = rotY;   /* contact footprint tracks the wheels */
-      cleanUniform.value += (cleanTarget - cleanUniform.value) * 0.045;  /* smooth detail sweep */
+      cleanUniform.value += (cleanTarget - cleanUniform.value) * 0.07;  /* visible detail sweep */
     }
     renderer.render(scene, camera);
   })();
