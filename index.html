@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APEX DETAIL — Luxury Car Detailing</title>
+<title>LUSTRE — Luxury Car Detailing</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="mask-icon" href="assets/favicon.svg" color="#b8924a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -119,8 +121,17 @@ nav.stuck {
 .nav-logo {
   font-family:var(--font-d); font-size:.9rem; font-weight:600;
   letter-spacing:.32em; color:var(--gold); text-decoration:none;
+  display:inline-flex; align-items:center;
 }
 .nav-logo span { color:var(--text); font-weight:400; }
+/* ── BRAND MARK (LUSTRE monogram) ───────────── */
+.logo-mark {
+  height:1.5em; width:auto; flex-shrink:0;
+  color:var(--gold); margin-right:.62em;
+  transition:transform .4s var(--ease);
+}
+.nav-logo:hover .logo-mark,
+.foot-logo:hover .logo-mark { transform:translateY(-1px) rotate(-3deg); }
 .nav-links { display:flex; gap:40px; list-style:none; }
 .nav-links a {
   font-size:.65rem; font-weight:400; letter-spacing:.22em;
@@ -166,21 +177,35 @@ nav.stuck {
   overflow:hidden;
 }
 /* ── HERO BACKGROUND ─────────────────────────── */
-.hero-bg-image {
-  position:absolute;
-  top:-5%; left:-5%;
-  width:110%; height:110%;
+/* live cinematic footage — light raking across freshly detailed paint.
+   the moving scene is the immersion; the still poster is the fallback. */
+.hero-bg-video {
+  position:absolute; inset:0;
+  width:100%; height:100%;
   object-fit:cover;
-  object-position:center 40%;
+  object-position:center 50%;
   z-index:0;
+  filter:contrast(1.08) saturate(1.12) brightness(.84);
 }
 .hero-bg {
   position:absolute; inset:0; z-index:1;
   background:
-    radial-gradient(ellipse 55% 55% at 68% 58%, rgba(184,146,74,.07) 0%, transparent 60%),
-    radial-gradient(ellipse 35% 55% at 28% 38%, rgba(184,146,74,.04) 0%, transparent 55%),
-    linear-gradient(rgba(28,24,16,.52), rgba(28,24,16,.52)),
-    linear-gradient(155deg,rgba(250,246,240,.55) 0%,rgba(245,239,229,.38) 50%,rgba(240,234,216,.46) 100%);
+    /* warm key-light bloom raking across the body */
+    radial-gradient(ellipse 60% 70% at 72% 42%, rgba(212,170,110,.16) 0%, transparent 55%),
+    /* cool counter-shadow for cinematic teal/amber separation */
+    radial-gradient(ellipse 55% 70% at 18% 30%, rgba(40,52,68,.22) 0%, transparent 60%),
+    /* legibility scrim behind the centered title — soft, not flat */
+    radial-gradient(ellipse 70% 55% at 50% 48%, rgba(10,9,7,.40) 0%, transparent 62%),
+    /* ground the bottom for the buttons + scroll cue */
+    linear-gradient(to top, rgba(8,7,6,.78) 0%, rgba(8,7,6,.30) 26%, transparent 50%),
+    /* gentle top darken for the eyebrow */
+    linear-gradient(to bottom, rgba(8,7,6,.42) 0%, transparent 30%);
+}
+/* cinematic vignette — darkens the corners so the frame reads as a photograph */
+.hero::after {
+  content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(ellipse 90% 90% at 50% 50%, transparent 52%, rgba(0,0,0,.55) 100%);
+  mix-blend-mode:multiply;
 }
 
 /* ── REGISTRY GATE CURTAIN ───────────────────── */
@@ -198,8 +223,8 @@ nav.stuck {
   /* clean, moody studio void — a soft pool of light on the floor fading to black */
   background:
     radial-gradient(ellipse 95% 62% at 50% 80%, #1b1b1f 0%, #0c0c0e 46%, #040405 100%);
-  transition:transform 1.8s cubic-bezier(0.16,1,0.3,1);
-  will-change:transform;
+  transition:opacity 1.1s ease 0.3s;   /* hold, then dissolve as the camera flies through */
+  will-change:opacity;
 }
 /* middle row — grows to fill the space between header and actions, car centered */
 .gate-stage {
@@ -233,9 +258,24 @@ nav.stuck {
 @keyframes gdhDot { 0%,100%{transform:scale(1);opacity:.7} 50%{transform:scale(1.5);opacity:1} }
 body.gate-unlocked .gate-detail-hint { opacity:0; }
 body.gate-unlocked .registry-gate-curtain {
-  transform:translateY(-100vh);
+  opacity:0;
   pointer-events:none;
 }
+/* Studio Reveal — branding + button glide out as the camera launches forward */
+body.gate-unlocked .gate-branding,
+body.gate-unlocked .gate-bottom-actions {
+  opacity:0;
+  transform:scale(1.05);
+  transition:opacity .8s ease-in-out, transform .8s ease-in-out;
+}
+/* main layout cross-fades in mid-zoom */
+.app-viewport-stage {
+  opacity:0;
+  transform:scale(0.98);
+  transform-origin:center 42%;
+  transition:opacity 1s ease-out, transform 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+.app-viewport-stage.active { opacity:1; transform:none; }
 .gate-bottom-actions {
   display:flex; flex-direction:column; align-items:center;
   width:100%; text-align:center;
@@ -245,7 +285,9 @@ body.gate-unlocked .registry-gate-curtain {
   letter-spacing:.5em; text-transform:uppercase;   /* spread elegantly across the top */
   color:#FFFFFF !important;
   text-shadow:0 2px 12px rgba(0,0,0,.95);
+  display:inline-flex; align-items:center; justify-content:center;
 }
+.gate-logo .logo-mark { filter:drop-shadow(0 2px 8px rgba(0,0,0,.6)); }
 .gate-logo em { color:var(--gold); font-style:normal; }
 .gate-tagline {
   font-family:var(--font-s); font-size:.9rem; font-weight:400; font-style:italic;
@@ -380,7 +422,8 @@ body.gate-unlocked .hero-eye { opacity:1; transform:none; filter:blur(0); }
   font-family:var(--font-d);
   font-size:clamp(3.8rem,8.5vw,8rem);
   font-weight:400; line-height:.92; letter-spacing:-.01em;
-  color:var(--text); margin-bottom:30px;
+  color:#f6efe3; margin-bottom:30px;
+  text-shadow:0 2px 28px rgba(0,0,0,.55), 0 1px 4px rgba(0,0,0,.4);
   opacity:0; transform:translateY(22px); filter:blur(3px);
   transition:opacity 1.6s var(--ease) 1.0s,
              transform 1.6s var(--ease) 1.0s,
@@ -399,11 +442,32 @@ body.gate-unlocked .hero-title { opacity:1; transform:none; filter:blur(0); }
              filter 1.2s var(--ease) 1.3s;
 }
 body.gate-unlocked .hero-sub { opacity:1; transform:none; filter:blur(0); }
+
+/* ── TEXT EFFECT (per-word blur stagger) ───── */
+/* vanilla port of the TextEffect component: each word reveals from blur+rise,
+   staggered. Block-level reveal on these elements is neutralised below. */
+.hero [data-te] { opacity:1; transform:none; filter:none; transition:none; }
+.hero .te-word {
+  display:inline-block; white-space:pre;
+  opacity:0; filter:blur(8px); transform:translateY(16px);
+  transition:opacity 1.6s var(--ease), filter 1.6s var(--ease), transform 1.7s var(--ease);
+  transition-delay:calc(var(--d,0s) + var(--i,0) * 0.11s);   /* graceful word-by-word */
+  will-change:opacity, filter, transform;
+}
+body.gate-unlocked .hero .te-word { opacity:1; filter:blur(0); transform:none; }
+@media (prefers-reduced-motion:reduce){
+  /* still reveal word-by-word, just without the blur/rise motion */
+  .hero .te-word {
+    filter:none; transform:none;
+    transition:opacity 1.4s var(--ease);
+    transition-delay:calc(var(--d,0s) + var(--i,0) * 0.1s);
+  }
+}
 .hero-btns {
   display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
   opacity:0; transform:translateY(16px);
-  transition:opacity 1.4s var(--ease) 1.6s,
-             transform 1.4s var(--ease) 1.6s;
+  transition:opacity 1.2s var(--ease) 3.6s,
+             transform 1.2s var(--ease) 3.6s;
 }
 body.gate-unlocked .hero-btns { opacity:1; transform:none; }
 
@@ -434,7 +498,7 @@ body.gate-unlocked .hero-btns { opacity:1; transform:none; }
 .hero-scroll {
   position:absolute; bottom:38px; left:50%; transform:translateX(-50%);
   display:flex; flex-direction:column; align-items:center; gap:12px;
-  opacity:0; transition:opacity 1.8s ease 2.1s;
+  opacity:0; transition:opacity 1.6s ease 4.1s;
 }
 body.gate-unlocked .hero-scroll { opacity:1; }
 .hero-scroll-txt {
@@ -701,7 +765,7 @@ body.gate-unlocked .hero-scroll { opacity:1; }
 
 /* ── GALLERY ──────────────────────────────── */
 .gallery { padding:140px 0; background:var(--bg-2); overflow:hidden; }
-.gal-head { text-align:center; margin-bottom:72px; }
+.gal-head { text-align:center; margin-bottom:120px; }
 .gal-grid {
   display:grid;
   grid-template-columns:1.45fr 1fr 1fr;
@@ -736,6 +800,72 @@ body.gate-unlocked .hero-scroll { opacity:1; }
 .gal-ov-cta {
   font-size:.55rem; letter-spacing:.32em; text-transform:uppercase;
   color:rgba(255,255,255,.65); font-family:var(--font-b);
+}
+
+/* ── CIRCULAR 3D GALLERY ─────────────────── */
+.cg-wrap { margin:0 auto 88px; position:relative; }
+.cg-stage {
+  position:relative; height:440px;
+  perspective:1500px;
+  touch-action:pan-y;
+  cursor:grab;
+}
+.cg-stage.dragging { cursor:grabbing; }
+.cg-ring {
+  position:absolute; inset:0;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.cg-card {
+  position:absolute; top:50%; left:50%;
+  width:240px; height:320px;
+  margin:-160px 0 0 -120px;
+  border-radius:14px; overflow:hidden;
+  border:1px solid var(--gold-bdr);
+  background:var(--text);
+  box-shadow:0 34px 64px -22px rgba(0,0,0,.65), 0 0 0 1px rgba(184,146,74,.06);
+  -webkit-backface-visibility:hidden; backface-visibility:hidden;
+  transition:opacity .3s linear;
+}
+.cg-card img {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; user-select:none; pointer-events:none;
+  filter:saturate(1.06) contrast(1.04);
+}
+.cg-card-cap {
+  position:absolute; left:0; right:0; bottom:0; padding:22px 20px 18px;
+  background:linear-gradient(to top, rgba(10,8,6,.94) 0%, rgba(10,8,6,.45) 58%, transparent 100%);
+}
+.cg-card-lbl {
+  font-family:var(--font-b); font-size:.5rem; font-weight:600;
+  letter-spacing:.34em; text-transform:uppercase; color:var(--gold-lt);
+  display:block; margin-bottom:8px;
+}
+.cg-card-title {
+  font-family:var(--font-d); font-size:1.02rem; font-weight:400;
+  color:#fff; line-height:1.14; margin-bottom:4px;
+}
+.cg-card-sub {
+  font-family:var(--font-s); font-size:.82rem; font-style:italic;
+  color:rgba(245,239,229,.6); line-height:1.4;
+}
+.cg-card-cta {
+  display:block; margin-top:11px;
+  font-family:var(--font-b); font-size:.5rem; font-weight:500;
+  letter-spacing:.26em; text-transform:uppercase; color:var(--gold-lt);
+  opacity:0; transform:translateY(4px);
+  transition:opacity .35s var(--ease), transform .35s var(--ease);
+}
+.cg-card:hover .cg-card-cta { opacity:1; transform:none; }
+.cg-hint {
+  text-align:center; margin-top:34px;
+  font-size:.56rem; letter-spacing:.34em; text-transform:uppercase; color:var(--dim);
+  display:flex; align-items:center; justify-content:center; gap:13px;
+}
+.cg-hint::before, .cg-hint::after { content:''; width:30px; height:1px; background:var(--gold-bdr); }
+@media(max-width:768px){
+  .cg-stage { height:360px; perspective:1100px; }
+  .cg-card { width:188px; height:250px; margin:-125px 0 0 -94px; }
 }
 
 /* ── PORTFOLIO MODAL ──────────────────── */
@@ -844,57 +974,126 @@ body.gate-unlocked .hero-scroll { opacity:1; }
 /* ── TESTIMONIALS ─────────────────────────── */
 .testi { padding:140px 0; background:var(--bg); }
 .testi-head { text-align:center; margin-bottom:72px; }
-.testi-carousel {
-  display:flex; align-items:center; gap:28px;
-  max-width:780px; margin:0 auto;
+/* minimal quote + expanding avatar pills */
+.testi-stage {
+  display:flex; flex-direction:column; align-items:center; gap:42px;
+  max-width:680px; margin:0 auto;
 }
-.testi-card {
-  flex:1; background:var(--bg); padding:56px 52px;
-  position:relative; border:1px solid var(--gold-bdr);
-  transition:opacity .24s ease, transform .24s ease;
-}
-.testi-card.fading { opacity:0; transform:translateY(10px); }
-.testi-stars { position:absolute; top:42px; right:42px; display:flex; gap:3px; }
+.testi-stars { display:flex; gap:6px; }
 .star {
-  width:7px; height:7px; background:var(--gold); opacity:.8;
+  width:9px; height:9px; background:var(--gold); opacity:.85;
   clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
 }
-.testi-q {
-  font-family:var(--font-s); font-size:4.5rem; line-height:1;
-  color:var(--gold); opacity:.18; margin-bottom:-18px;
+.testi-quote-wrap { position:relative; padding:0 38px; }
+.testi-qmark {
+  position:absolute; font-family:var(--font-d); font-size:5.5rem; line-height:1;
+  color:rgba(184,146,74,.18); user-select:none; pointer-events:none;
 }
+.testi-qmark.open  { left:-8px;  top:-36px; }
+.testi-qmark.close { right:-8px; bottom:-62px; }
 .testi-txt {
-  font-family:var(--font-s); font-size:1.04rem; font-weight:300;
-  font-style:italic; color:var(--text); line-height:1.78; margin-bottom:34px;
+  font-family:var(--font-s); font-size:clamp(1.55rem,3vw,2.35rem);
+  font-weight:400; font-style:italic; color:var(--text);
+  text-align:center; line-height:1.45; max-width:560px; margin:0 auto;
+  transition:opacity .4s var(--ease), filter .4s var(--ease), transform .4s var(--ease);
 }
-.testi-div { width:28px; height:1px; background:var(--gold); opacity:.55; margin-bottom:24px; }
-.testi-name {
-  font-family:var(--font-d); font-size:.72rem; font-weight:600;
-  letter-spacing:.1em; color:var(--text); margin-bottom:5px;
+.testi-txt.swapping { opacity:0; filter:blur(5px); transform:scale(.98); }
+.testi-vehicle {
+  font-size:.62rem; letter-spacing:.24em; text-transform:uppercase; color:var(--dim);
+  transition:opacity .5s var(--ease), transform .5s var(--ease);
 }
-.testi-vehicle { font-size:.62rem; font-weight:300; color:var(--dim); letter-spacing:.1em; }
-.tcarr-arr {
-  flex-shrink:0; width:46px; height:46px; border-radius:50%;
-  border:1px solid var(--gold-bdr); background:transparent;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; color:var(--gold);
-  transition:background .25s ease, border-color .25s ease;
+.testi-vehicle.swapping { opacity:0; transform:translateY(8px); }
+.testi-pills { display:flex; align-items:center; justify-content:center; gap:8px; }
+.testi-pill {
+  display:flex; align-items:center; border:none; background:transparent;
+  border-radius:999px; padding:3px; cursor:pointer;
+  transition:background .5s cubic-bezier(.4,0,.2,1), padding .5s cubic-bezier(.4,0,.2,1), box-shadow .5s;
 }
-.tcarr-arr:hover { background:var(--bg-2); border-color:var(--gold); }
-.tcarr-arr:active { transform:scale(.94); }
-.tcarr-arr svg { width:18px; height:18px; stroke:var(--gold); fill:none; stroke-width:1.5; }
-.tcarr-dots {
-  display:flex; justify-content:center; gap:10px; margin-top:42px;
+.testi-pill:hover { background:var(--bg-2); }
+.testi-pill.active {
+  background:var(--text); padding:5px 18px 5px 5px;
+  box-shadow:0 12px 30px -12px rgba(28,24,16,.45);
 }
-.tcarr-dot {
-  width:6px; height:6px; border-radius:50%;
-  background:var(--gold); opacity:.25; cursor:pointer;
-  border:none; padding:0; transition:opacity .25s ease, transform .25s ease;
+.testi-pill img {
+  width:40px; height:40px; border-radius:50%; object-fit:cover; flex-shrink:0;
+  transition:box-shadow .5s, transform .4s var(--ease);
 }
-.tcarr-dot.active { opacity:.85; transform:scale(1.35); }
+.testi-pill:not(.active):hover img { transform:scale(1.06); }
+.testi-pill.active img { box-shadow:0 0 0 2px rgba(250,246,240,.5); }
+.testi-pill-name {
+  display:grid; grid-template-columns:0fr; margin-left:0;
+  transition:grid-template-columns .5s cubic-bezier(.4,0,.2,1), margin-left .5s cubic-bezier(.4,0,.2,1);
+}
+.testi-pill.active .testi-pill-name,
+.testi-pill:hover  .testi-pill-name { grid-template-columns:1fr; margin-left:10px; }
+.testi-pill-name .tpn {
+  overflow:hidden; white-space:nowrap;
+  font-family:var(--font-d); font-size:.72rem; font-weight:600; letter-spacing:.06em;
+  opacity:0; transition:opacity .4s ease .08s;
+}
+.testi-pill.active .testi-pill-name .tpn,
+.testi-pill:hover  .testi-pill-name .tpn { opacity:1; }
+.testi-pill.active .tpn { color:var(--bg); }
+.testi-pill:not(.active) .tpn { color:var(--text); }
+
+/* ── MICROGRAPHICS (stats + the standard) ──── */
+.mg-grid { display:grid; grid-template-columns:repeat(4,1fr); }
+.mg-item {
+  text-align:center; padding:16px 18px;
+  border-right:1px solid var(--gold-bdr);
+}
+.mg-item:last-child { border-right:none; }
+.mg-ico {
+  width:46px; height:46px; display:block; margin:0 auto 18px;
+  color:var(--gold);
+  transition:transform .5s var(--ease);
+}
+.mg-item:hover .mg-ico { transform:translateY(-4px); }
+.mg-n {
+  font-family:var(--font-d); font-size:2.05rem; font-weight:400;
+  color:var(--text); line-height:1; margin-bottom:9px;
+}
+.mg-n small { font-size:.5em; color:var(--gold); margin-left:.12em; letter-spacing:.02em; }
+.mg-l {
+  font-size:.57rem; font-weight:400; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--muted);
+}
+.mg-item.reveal { transition:opacity .8s var(--ease), transform .8s var(--ease); }
+/* card variant for the Why section */
+.mg-panel {
+  margin:96px auto 0; max-width:1080px;
+  background:var(--card-bg);
+  border:1px solid var(--gold-bdr); border-radius:16px;
+  box-shadow:0 30px 60px -34px rgba(28,24,16,.22);
+  padding:38px 20px;
+}
+.mg-panel.reveal { transition:opacity .9s var(--ease), transform .9s var(--ease); }
+.mg-panel .mg-item { padding:20px 22px; }
+@media(max-width:768px){
+  .mg-grid { grid-template-columns:repeat(2,1fr); }
+  .mg-item:nth-child(2){ border-right:none; }
+  .mg-item:nth-child(1),.mg-item:nth-child(2){ border-bottom:1px solid var(--gold-bdr); }
+  .mg-item{ padding-top:26px; padding-bottom:26px; }
+}
 
 /* ── CONTACT ──────────────────────────────── */
-.contact { padding:140px 0; background:var(--bg-2); }
+.contact {
+  padding:130px 0; position:relative;
+  /* moody car backdrop; content floats on a frosted panel for legibility */
+  background:
+    linear-gradient(rgba(12,10,7,.34), rgba(12,10,7,.46)),
+    url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1920&auto=format&fit=crop&q=85') center 42%/cover no-repeat;
+  background-attachment:scroll, fixed;
+}
+.contact .container { position:relative; z-index:1; }
+.contact .contact-inner {
+  background:rgba(250,246,240,.92);
+  -webkit-backdrop-filter:blur(9px); backdrop-filter:blur(9px);
+  border:1px solid var(--gold-bdr); border-radius:18px;
+  padding:60px 64px; gap:72px;
+  box-shadow:0 44px 90px -44px rgba(0,0,0,.5);
+}
+@media(max-width:768px){ .contact .contact-inner { padding:40px 28px; } }
 .contact-inner {
   display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:start;
 }
@@ -985,6 +1184,7 @@ footer {
 .foot-logo {
   font-family:var(--font-d); font-size:.88rem; font-weight:600;
   letter-spacing:.3em; color:var(--gold);
+  display:inline-flex; align-items:center;
 }
 .foot-logo span { color:var(--muted); font-weight:400; }
 .foot-links { display:flex; gap:34px; list-style:none; }
@@ -1157,7 +1357,7 @@ footer {
 <!-- REGISTRY GATE CURTAIN -->
 <div class="registry-gate-curtain">
   <div class="gate-branding">
-    <p class="gate-logo">APEX <em>DETAIL</em></p>
+    <p class="gate-logo"><svg class="logo-mark" viewBox="0 0 32 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 4V19H21.5" stroke="currentColor" stroke-width="3" stroke-linecap="square"/><line x1="6" y1="20.2" x2="25" y2="20.2" stroke="currentColor" stroke-width="1" opacity=".32"/><path d="M11 21.4V31.5" stroke="currentColor" stroke-width="3" stroke-linecap="square" opacity=".22"/><path d="M23.5 3.5L24.6 6.4L27.5 7.5L24.6 8.6L23.5 11.5L22.4 8.6L19.5 7.5L22.4 6.4Z" fill="currentColor" opacity=".95"/></svg>LUSTRE</p>
     <p class="gate-tagline">Luxury Car Detailing · By Appointment</p>
   </div>
   <div class="gate-stage">
@@ -1165,7 +1365,7 @@ footer {
   </div>
   <div class="gate-bottom-actions">
     <p class="gate-detail-hint"><span class="gdh-dot"></span>Drag to spin · Tap the car to detail it</p>
-    <button id="gate-trigger">ENTER APEX REGISTRY</button>
+    <button id="gate-trigger">ENTER LUSTRE REGISTRY</button>
   </div>
 </div>
 
@@ -1184,7 +1384,7 @@ footer {
 
 <!-- NAV -->
 <nav id="nav" class="main-header gate-hidden">
-  <a href="#" class="nav-logo">APEX <span>DETAIL</span></a>
+  <a href="#" class="nav-logo"><svg class="logo-mark" viewBox="0 0 32 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 4V19H21.5" stroke="currentColor" stroke-width="3" stroke-linecap="square"/><line x1="6" y1="20.2" x2="25" y2="20.2" stroke="currentColor" stroke-width="1" opacity=".32"/><path d="M11 21.4V31.5" stroke="currentColor" stroke-width="3" stroke-linecap="square" opacity=".22"/><path d="M23.5 3.5L24.6 6.4L27.5 7.5L24.6 8.6L23.5 11.5L22.4 8.6L19.5 7.5L22.4 6.4Z" fill="currentColor" opacity=".95"/></svg>LUSTRE</a>
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
     <li><a href="#why">About</a></li>
@@ -1200,19 +1400,22 @@ footer {
 
 <!-- HERO -->
 <section class="hero">
-  <img
-    class="hero-bg-image"
-    src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&auto=format&fit=crop&q=85"
-    alt=""
+  <video
+    class="hero-bg-video"
+    autoplay muted loop playsinline preload="auto"
+    poster="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=2400&auto=format&fit=crop&q=92"
     aria-hidden="true"
   >
+    <source src="assets/hero-detailing.mp4" type="video/mp4">
+    <source src="assets/hero-detailing-hd.mp4" type="video/mp4">
+  </video>
   <div class="hero-bg"></div>
   <div class="hero-vline"></div>
   <div class="hero-hline"></div>
   <div class="hero-content">
     <p class="hero-eye">Luxury Car Detailing</p>
-    <h1 class="hero-title">Brought Back<br>to <em>Its Best.</em></h1>
-    <p class="hero-sub">Leave the mess. Pick up perfection.</p>
+    <h1 class="hero-title" data-te data-te-delay="1.2s">Brought Back<br>to <em>Its Best.</em></h1>
+    <p class="hero-sub" data-te data-te-delay="2.3s">Leave the mess. Pick up perfection.</p>
     <div class="hero-btns">
       <a href="#contact" class="btn-gold">Commission a Detail</a>
       <a href="#services" class="btn-ghost">View Packages</a>
@@ -1229,22 +1432,40 @@ footer {
 <!-- STATS -->
 <div class="stats">
   <div class="container">
-    <div class="stats-grid">
-      <div class="stat reveal d1">
-        <div class="stat-n" data-count="2400">0</div>
-        <div class="stat-l">Vehicles Detailed</div>
+    <div class="mg-grid">
+      <div class="mg-item reveal d1">
+        <svg class="mg-ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 28 13 23 19 25.5 26 16 34 11"/>
+          <circle cx="34" cy="11" r="2" fill="currentColor" stroke="none"/>
+          <line x1="6" y1="32.5" x2="34" y2="32.5" opacity=".22"/>
+        </svg>
+        <div class="mg-n" data-count="2400">0</div>
+        <div class="mg-l">Details Completed</div>
       </div>
-      <div class="stat reveal d2">
-        <div class="stat-n">12+</div>
-        <div class="stat-l">Years Experience</div>
+      <div class="mg-item reveal d2">
+        <svg class="mg-ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="20" cy="20" r="4.5"/>
+          <circle cx="20" cy="20" r="9" opacity=".55"/>
+          <circle cx="20" cy="20" r="13.5" opacity=".28"/>
+        </svg>
+        <div class="mg-n">12<small>+</small></div>
+        <div class="mg-l">Years Experience</div>
       </div>
-      <div class="stat reveal d3">
-        <div class="stat-n">100%</div>
-        <div class="stat-l">Satisfaction Rate</div>
+      <div class="mg-item reveal d3">
+        <svg class="mg-ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="20" cy="20" r="13"/>
+          <path d="M20 14.4 L21.5 18.5 L25.6 20 L21.5 21.5 L20 25.6 L18.5 21.5 L14.4 20 L18.5 18.5 Z" fill="currentColor" stroke="none"/>
+        </svg>
+        <div class="mg-n">100<small>%</small></div>
+        <div class="mg-l">Satisfaction Rate</div>
       </div>
-      <div class="stat reveal d4">
-        <div class="stat-n">4.9★</div>
-        <div class="stat-l">Average Rating</div>
+      <div class="mg-item reveal d4">
+        <svg class="mg-ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 28.5 A13 13 0 1 1 29 28.5"/>
+          <circle cx="29" cy="28.5" r="2" fill="currentColor" stroke="none"/>
+        </svg>
+        <div class="mg-n">4.9</div>
+        <div class="mg-l">Average Rating</div>
       </div>
     </div>
   </div>
@@ -1690,7 +1911,7 @@ footer {
   <div class="container">
     <div class="why-inner">
       <div class="reveal-l">
-        <div class="lbl">Why Apex Detail</div>
+        <div class="lbl">Why LUSTRE</div>
         <h2 class="sec-h">The Standard<br>We Hold Ourselves To</h2>
         <p class="sec-p">We've been doing this long enough to know what actually matters — the right product, enough time on the car, and no shortcuts. Every vehicle leaves cleaner than it arrived. That's the only standard we know.</p>
         <br><br>
@@ -1719,6 +1940,52 @@ footer {
         </div>
       </div>
     </div>
+
+    <!-- The standard, in micrographics -->
+    <div class="mg-panel reveal">
+      <div class="mg-grid">
+        <div class="mg-item">
+          <svg class="mg-ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="20" cy="20" r="13"/>
+            <line x1="20" y1="7.2" x2="20" y2="32.8"/>
+            <line x1="9.6" y1="16.5" x2="14.6" y2="16.5" opacity=".65"/>
+            <line x1="8.7" y1="20" x2="14.6" y2="20" opacity=".65"/>
+            <line x1="9.6" y1="23.5" x2="14.6" y2="23.5" opacity=".65"/>
+            <path d="M25.4 16.4a5 5 0 0 1 2.6 4.6"/>
+          </svg>
+          <div class="mg-n">95<small>%</small></div>
+          <div class="mg-l">Defects Removed</div>
+        </div>
+        <div class="mg-item">
+          <svg class="mg-ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 26 A13 13 0 0 1 33 26"/>
+            <line x1="7" y1="26" x2="33" y2="26"/>
+            <line x1="20" y1="26" x2="20" y2="14.5"/>
+            <line x1="20" y1="26" x2="27.5" y2="21.5"/>
+          </svg>
+          <div class="mg-n">12<small>hrs</small></div>
+          <div class="mg-l">Typical Full Detail</div>
+        </div>
+        <div class="mg-item">
+          <svg class="mg-ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 16 L20 11 L32 16"/>
+            <path d="M8 21 L20 16 L32 21" opacity=".62"/>
+            <path d="M8 26 L20 21 L32 26" opacity=".38"/>
+          </svg>
+          <div class="mg-n">3</div>
+          <div class="mg-l">Pro Coating Systems</div>
+        </div>
+        <div class="mg-item">
+          <svg class="mg-ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M13 9 H27 L33 17 L20 32 L7 17 Z"/>
+            <path d="M7 17 H33"/>
+            <path d="M13 9 L17 17 L20 32 M27 9 L23 17 L20 32 M17 17 H23 M7 17 L20 32 M33 17 L20 32" opacity=".55"/>
+          </svg>
+          <div class="mg-n">9H</div>
+          <div class="mg-l">Ceramic Hardness</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1730,43 +1997,12 @@ footer {
       <h2 class="sec-h">The Results<br>Speak for Themselves</h2>
     </div>
   </div>
-  <div class="container" style="max-width:1380px">
-    <div class="gal-grid">
-      <div class="gal-item reveal d1" onclick="openPortfolioModal('porsche')">
-        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=900&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
-        <div class="gal-ov">
-          <span class="gal-ov-lbl">Paint Correction — Porsche 911</span>
-          <span class="gal-ov-cta">View Case Study →</span>
-        </div>
+  <div class="container" style="max-width:1280px">
+    <div class="cg-wrap">
+      <div class="cg-stage" id="cgStage">
+        <div class="cg-ring" id="cgRing"></div>
       </div>
-      <div class="gal-item reveal d2" onclick="openPortfolioModal('bmw')">
-        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=700&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
-        <div class="gal-ov">
-          <span class="gal-ov-lbl">Ceramic Shield — BMW M3</span>
-          <span class="gal-ov-cta">View Case Study →</span>
-        </div>
-      </div>
-      <div class="gal-item reveal d3" onclick="openPortfolioModal('rangerover')">
-        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=700&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
-        <div class="gal-ov">
-          <span class="gal-ov-lbl">Interior Detail — Range Rover</span>
-          <span class="gal-ov-cta">View Case Study →</span>
-        </div>
-      </div>
-      <div class="gal-item reveal d4" onclick="openPortfolioModal('ferrari')">
-        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=700&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
-        <div class="gal-ov">
-          <span class="gal-ov-lbl">Full Concours — Ferrari 488</span>
-          <span class="gal-ov-cta">View Case Study →</span>
-        </div>
-      </div>
-      <div class="gal-item reveal d5" onclick="openPortfolioModal('lamborghini')">
-        <div class="gal-img" style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&auto=format&fit=crop&q=80'); background-size:cover; background-position:center;"></div>
-        <div class="gal-ov">
-          <span class="gal-ov-lbl">Wheel Restoration — Lamborghini</span>
-          <span class="gal-ov-cta">View Case Study →</span>
-        </div>
-      </div>
+      <p class="cg-hint">Drag to spin · tap a car to read the case study</p>
     </div>
   </div>
 </section>
@@ -1778,28 +2014,30 @@ footer {
       <div class="lbl center">Testimonials</div>
       <h2 class="sec-h">What Clients Say</h2>
     </div>
-    <div class="testi-carousel reveal">
-      <button class="tcarr-arr" id="testiPrev" aria-label="Previous testimonial">
-        <svg viewBox="0 0 20 20"><polyline points="13 16 7 10 13 4"/></svg>
-      </button>
-      <div class="testi-card" id="testiCard">
-        <div class="testi-stars">
-          <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
-        </div>
-        <div class="testi-q">"</div>
-        <p class="testi-txt" id="testiTxt">I brought in my 911 with heavy swirl marks from a previous shop. They corrected it to a standard I didn't think was still possible. Looks better now than the day I collected it.</p>
-        <div class="testi-div"></div>
-        <div class="testi-name" id="testiName">Marcus R.</div>
-        <div class="testi-vehicle" id="testiVehicle">Porsche 911 GT3 — Ceramic Shield</div>
+    <div class="testi-stage reveal">
+      <div class="testi-stars" aria-label="Five star rating">
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
       </div>
-      <button class="tcarr-arr" id="testiNext" aria-label="Next testimonial">
-        <svg viewBox="0 0 20 20"><polyline points="7 4 13 10 7 16"/></svg>
-      </button>
-    </div>
-    <div class="tcarr-dots" id="testiDots">
-      <button class="tcarr-dot active"></button>
-      <button class="tcarr-dot"></button>
-      <button class="tcarr-dot"></button>
+      <div class="testi-quote-wrap">
+        <span class="testi-qmark open">&ldquo;</span>
+        <p class="testi-txt" id="testiTxt">They corrected it to a standard I didn&rsquo;t think was still possible.</p>
+        <span class="testi-qmark close">&rdquo;</span>
+      </div>
+      <div class="testi-vehicle" id="testiVehicle">Porsche 911 GT3 — Ceramic Shield</div>
+      <div class="testi-pills" id="testiPills">
+        <button class="testi-pill active" data-i="0" aria-label="Marcus R.">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&crop=faces&q=80" alt="Marcus R.">
+          <span class="testi-pill-name"><span class="tpn">Marcus R.</span></span>
+        </button>
+        <button class="testi-pill" data-i="1" aria-label="Sophia L.">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&crop=faces&q=80" alt="Sophia L.">
+          <span class="testi-pill-name"><span class="tpn">Sophia L.</span></span>
+        </button>
+        <button class="testi-pill" data-i="2" aria-label="James T.">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=faces&q=80" alt="James T.">
+          <span class="testi-pill-name"><span class="tpn">James T.</span></span>
+        </button>
+      </div>
     </div>
   </div>
 </section>
@@ -1819,7 +2057,7 @@ footer {
           </div>
           <div>
             <div class="ci-lbl">Email</div>
-            <div class="ci-val">hello@apexdetail.co</div>
+            <div class="ci-val">hello@lustre.co</div>
           </div>
           <div>
             <div class="ci-lbl">Service Area</div>
@@ -1893,14 +2131,14 @@ footer {
 <footer>
   <div class="container">
     <div class="foot-inner">
-      <div class="foot-logo">APEX <span>DETAIL</span></div>
+      <div class="foot-logo"><svg class="logo-mark" viewBox="0 0 32 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 4V19H21.5" stroke="currentColor" stroke-width="3" stroke-linecap="square"/><line x1="6" y1="20.2" x2="25" y2="20.2" stroke="currentColor" stroke-width="1" opacity=".32"/><path d="M11 21.4V31.5" stroke="currentColor" stroke-width="3" stroke-linecap="square" opacity=".22"/><path d="M23.5 3.5L24.6 6.4L27.5 7.5L24.6 8.6L23.5 11.5L22.4 8.6L19.5 7.5L22.4 6.4Z" fill="currentColor" opacity=".95"/></svg>LUSTRE</div>
       <ul class="foot-links">
         <li><a href="#services">Services</a></li>
         <li><a href="#gallery">Gallery</a></li>
         <li><a href="#testimonials">Reviews</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
-      <div class="foot-copy">© 2026 Apex Detail. All rights reserved.</div>
+      <div class="foot-copy">© 2026 LUSTRE. All rights reserved.</div>
     </div>
   </div>
 </footer>
@@ -1921,10 +2159,185 @@ document.addEventListener('mousemove', e => {
   requestAnimationFrame(tick);
 })();
 
-document.querySelectorAll('a,button,.svc-card,.why-card,.gal-item,.testi-card,.svc-custom').forEach(el=>{
+document.querySelectorAll('a,button,.svc-card,.why-card,.gal-item,.testi-pill,.svc-custom').forEach(el=>{
   el.addEventListener('mouseenter',()=>{ cur.classList.add('hov'); ring.classList.add('hov'); });
   el.addEventListener('mouseleave',()=>{ cur.classList.remove('hov'); ring.classList.remove('hov'); });
 });
+
+// ── TextEffect — split hero text into per-word reveal spans ──
+// Vanilla port of the TextEffect component (per-word, blur preset). Preserves
+// the <em> accent and <br>; reveal is triggered by body.gate-unlocked via CSS.
+document.querySelectorAll('.hero [data-te]').forEach(el=>{
+  el.style.setProperty('--d', el.dataset.teDelay || '0s');
+  let i = 0;
+  const build = node => {
+    const frag = document.createDocumentFragment();
+    node.childNodes.forEach(child=>{
+      if(child.nodeType === 3){                       // text → words
+        child.textContent.split(/(\s+)/).forEach(part=>{
+          if(part === '') return;
+          if(/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
+          const s = document.createElement('span');
+          s.className = 'te-word'; s.style.setProperty('--i', i++); s.textContent = part;
+          frag.appendChild(s);
+        });
+      } else if(child.nodeName === 'BR'){
+        frag.appendChild(document.createElement('br'));
+      } else if(child.nodeType === 1){                 // keep wrappers like <em>
+        const clone = child.cloneNode(false);
+        clone.appendChild(build(child));
+        frag.appendChild(clone);
+      }
+    });
+    return frag;
+  };
+  const frag = build(el);
+  el.textContent = '';
+  el.appendChild(frag);
+});
+
+// ── Pricing card flip ───────────────────────
+document.querySelectorAll('.svc-card').forEach(card=>{
+  card.addEventListener('click',e=>{
+    // let real links (Book This) navigate without flipping
+    if(e.target.closest('a')) return;
+    // "Flip back" button always returns to the front
+    if(e.target.closest('.card-back-close')){ card.classList.remove('flipped'); return; }
+    card.classList.toggle('flipped');
+  });
+});
+
+// ── Circular 3D work gallery ────────────────
+// Vanilla port of the circular-gallery component, themed for detailing work
+// (no animals): auto-rotates, drag-to-spin with inertia, depth opacity falloff.
+(function circularGallery(){
+  const ring  = document.getElementById('cgRing');
+  const stage = document.getElementById('cgStage');
+  if(!ring || !stage) return;
+
+  const items = [
+    { label:'Paint Correction', title:'Porsche Panamera', sub:'Mirror-finish restoration', url:'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900&auto=format&fit=crop&q=80',
+      time:'12 Hours', correction:'2-Stage (92%+ Clear)',
+      story:'Delivered with halogen-revealed swirl marks and uneven gloss across the long roofline. A measured two-stage correction levelled the clear coat panel by panel, then we locked the depth in under a nano-ceramic layer so the reflection finally runs unbroken from nose to tail.',
+      quote:'It looks wetter than the showroom car I test drove. The reflections are dead straight now.', author:'Marcus R.' },
+    { label:'Full Concours', title:'Ferrari LaFerrari', sub:'Show-ready, every panel', url:'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=900&auto=format&fit=crop&q=80',
+      time:'18 Hours', correction:'Concours Multi-Stage',
+      story:'A concours commission ahead of a private collectors’ showing. Full decontamination, paint depth readings on every panel, then a three-stage refinement to chase out the last micro-marring under Rosso Corsa. Hand-finished and photographed before it left the studio.',
+      quote:'They treated a seven-figure car with the patience it deserved. Flawless under the show lights.', author:'Alessandro V.' },
+    { label:'Ceramic Coating', title:'Bugatti Chiron', sub:'9H — three-year protection', url:'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=900&auto=format&fit=crop&q=80',
+      time:'2 Days', correction:'Prep + 9H Ceramic',
+      story:'Hyper-car prep before a graphene-reinforced 9H coating. Every defect was removed first — coating over flaws would have sealed them in permanently. Once cured, water sheets off instantly and the paint shrugs off fuel-stop fingerprints and UV alike.',
+      quote:'Rain just falls off it. Six months on it still beads like the day they handed it back.', author:'Khalid A.' },
+    { label:'Gloss Enhancement', title:'McLaren 720S', sub:'Single-stage machine polish', url:'https://images.unsplash.com/photo-1542362567-b07e54358753?w=900&auto=format&fit=crop&q=80',
+      time:'7 Hours', correction:'1-Step High Gloss',
+      story:'A newer car that only needed its full potential unlocked. A single refined machine-polish pass cut the light wash marring and lifted the metallic flake, finished with a high-gloss sealant for a deep, liquid shine that holds for months.',
+      quote:'Didn’t think a near-new car could improve this much. The flake absolutely pops now.', author:'Priya N.' },
+    { label:'Multi-Stage Polish', title:'Shelby GT350', sub:'Swirls & oxidation removed', url:'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&auto=format&fit=crop&q=80',
+      time:'14 Hours', correction:'3-Stage (95%+ Clear)',
+      story:'Years of automatic-wash swirls and edge oxidation on a cherished muscle car. We compounded, refined and jewelled the paint over three stages, bringing the tired black back to a glass-deep gloss without burning a single edge.',
+      quote:'The black is back to a mirror. Cars stop next to it at lights now.', author:'Derek H.' },
+    { label:'The Craft', title:'Finished by Hand', sub:'Detail brushes, every crevice', url:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&auto=format&fit=crop&q=80',
+      time:'Every Job', correction:'Hand-Finished Detail',
+      story:'The part machines can’t do. Soft detailing brushes through every vent, badge and trim gap; swabs along each shut-line; hand-applied dressings buffed to a factory satin rather than a greasy shine. It’s the slow, human finishing pass that separates a clean car from a detailed one.',
+      quote:'It’s the little corners nobody else touches that gave them away. Obsessive — in the best way.', author:'Helen M.' },
+    { label:'Iron Decon & Seal', title:'Mercedes-AMG GT', sub:'Fallout dissolved, sealed', url:'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=900&auto=format&fit=crop&q=80',
+      time:'6 Hours', correction:'Decon + Sealed',
+      story:'Embedded brake fallout and rail dust had left the paint feeling like sandpaper. An iron-dissolving treatment bled the contaminants out, a clay pass pulled the rest, and a synthetic sealant left the surface glass-smooth and genuinely protected.',
+      quote:'You can feel the difference with your eyes closed — it’s like glass now.', author:'Tomas B.' },
+    { label:'Winter Armour', title:'Audi Q5', sub:'Salt-proof ceramic layer', url:'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?w=900&auto=format&fit=crop&q=80',
+      time:'8 Hours', correction:'Ceramic + Underbody',
+      story:'Pre-winter armour for a daily-driven family SUV. Decontaminated, lightly polished, then sealed top to bottom — including wheel faces and underbody — with a ceramic layer engineered to stop road salt and grit etching the finish through the cold months.',
+      quote:'Through a brutal winter it still rinses clean in minutes. Best money I’ve spent on the car.', author:'Sarah W.' },
+    { label:'Swirl Removal', title:'Chevrolet Camaro', sub:'Deep-gloss correction', url:'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=900&auto=format&fit=crop&q=80',
+      time:'9 Hours', correction:'2-Stage Gloss',
+      story:'Vivid blue paint dulled by a haze of fine swirls that flattened the colour in sunlight. A two-stage correction cleared the marring and brought back the candy depth, then a glossing sealant set off the metallic so it reads three-dimensional again.',
+      quote:'In sunlight it looks like liquid candy now. I keep walking back out to look at it.', author:'Jordan P.' },
+  ];
+  const n = items.length;
+  const anglePer = 360 / n;
+  const radius = () => window.innerWidth < 768 ? 300 : 460;
+  let R = radius();
+
+  const cards = items.map((it,i)=>{
+    const c = document.createElement('div');
+    c.className = 'cg-card';
+    c.dataset.angle = i * anglePer;
+    c.dataset.idx = i;
+    c.innerHTML =
+      '<img src="'+it.url+'" alt="'+it.label+' — '+it.title+'" loading="lazy">'+
+      '<div class="cg-card-cap">'+
+        '<span class="cg-card-lbl">'+it.label+'</span>'+
+        '<div class="cg-card-title">'+it.title+'</div>'+
+        '<div class="cg-card-sub">'+it.sub+'</div>'+
+        '<span class="cg-card-cta">Read the case study →</span>'+
+      '</div>';
+    ring.appendChild(c);
+    return c;
+  });
+
+  // open the case-study modal, reusing the portfolio modal
+  function openCard(i){
+    const it = items[i]; if(!it) return;
+    openPortfolioModal({ package:it.label, title:it.title, img:it.url,
+      story:it.story, time:it.time, correction:it.correction,
+      quote:it.quote, author:it.author });
+  }
+
+  function layout(){
+    R = radius();
+    cards.forEach((c,i)=>{ c.style.transform = 'rotateY('+(i*anglePer)+'deg) translateZ('+R+'px)'; });
+  }
+  layout();
+  window.addEventListener('resize', layout);
+
+  let rot = 0, vel = 0, dragging = false, paused = false, lastX = 0;
+  const auto = 0.05;
+  const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  let downX=0, downY=0, downT=0, downCard=null, moved=0;
+  stage.addEventListener('pointerenter', ()=>{ paused = true; });
+  stage.addEventListener('pointerleave', ()=>{ if(!dragging) paused = false; });
+  stage.addEventListener('pointerdown', e=>{
+    dragging = true; paused = true; lastX = e.clientX; vel = 0;
+    downX = e.clientX; downY = e.clientY; downT = Date.now(); moved = 0;
+    downCard = e.target.closest('.cg-card');
+    stage.classList.add('dragging');
+    try{ stage.setPointerCapture(e.pointerId); }catch(_){}
+  });
+  stage.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const dx = e.clientX - lastX; lastX = e.clientX;
+    moved += Math.abs(dx);
+    rot += dx * 0.25; vel = dx * 0.25;
+  });
+  const end = e=>{
+    // a short, near-stationary press = a click → open that card's case study
+    const dist = Math.hypot((e.clientX||downX)-downX, (e.clientY||downY)-downY);
+    if(downCard && moved < 6 && dist < 6 && Date.now()-downT < 400){
+      openCard(+downCard.dataset.idx);
+    }
+    downCard = null;
+    dragging = false; stage.classList.remove('dragging'); paused = false;
+  };
+  stage.addEventListener('pointerup', end);
+  stage.addEventListener('pointercancel', end);
+
+  (function spin(){
+    if(!dragging){
+      if(Math.abs(vel) > 0.02){ rot += vel; vel *= 0.94; }     // release inertia
+      else if(!paused && !reduce){ rot += auto; }              // idle auto-rotate
+    }
+    ring.style.transform = 'rotateY('+rot+'deg)';
+    const norm = rot % 360;
+    cards.forEach(c=>{
+      const a = ((parseFloat(c.dataset.angle) + norm) % 360 + 360) % 360;
+      const off = a > 180 ? 360 - a : a;                       // 0 = facing us
+      c.style.opacity = Math.max(0.16, 1 - off / 180).toFixed(3);
+      c.style.zIndex = Math.round(1000 - off);
+    });
+    requestAnimationFrame(spin);
+  })();
+})();
 
 // ── Nav scroll ──────────────────────────────
 const nav = document.getElementById('nav');
@@ -2028,7 +2441,7 @@ function closeBioModal(){
 }
 
 function openPortfolioModal(id){
-  const d=portfolioData[id]; if(!d) return;
+  const d = (id && typeof id === 'object') ? id : portfolioData[id]; if(!d) return;
   document.getElementById('modal-main-img').src=d.img;
   document.getElementById('modal-package-tag').textContent=d.package;
   document.getElementById('modal-vehicle-title').textContent=d.title;
@@ -2047,34 +2460,31 @@ function closePortfolioModal(){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closePortfolioModal(); closeBioModal(); } });
 
-// ── Testimonial carousel ─────────────────────
+// ── Testimonials (quote + avatar pills) ──────
 (function(){
   const testimonials = [
-    { txt: "I brought in my 911 with heavy swirl marks from a previous shop. They corrected it to a standard I didn't think was still possible. Looks better now than the day I collected it.", name: "Marcus R.", vehicle: "Porsche 911 GT3 — Ceramic Shield" },
-    { txt: "The interior of my Range Rover was a state after a long road trip. They turned it around completely — the leather feels new again. Genuinely impressed start to finish.", name: "Sophia L.", vehicle: "Range Rover Sport — Interior Elite" },
-    { txt: "I've used three other detailers. None of them came close to this. The attention they give each panel is something you just have to see. Won't be going anywhere else.", name: "James T.", vehicle: "BMW M5 Competition — Full Concours" },
+    { txt: "They corrected it to a standard I didn’t think was still possible.", vehicle: "Porsche 911 GT3 — Ceramic Shield" },
+    { txt: "The leather feels new again — genuinely flawless, start to finish.", vehicle: "Range Rover Sport — Interior Elite" },
+    { txt: "I’ve used three other detailers. None of them came close to this.", vehicle: "BMW M5 Competition — Full Concours" },
   ];
-  const card = document.getElementById('testiCard');
   const txtEl = document.getElementById('testiTxt');
-  const nameEl = document.getElementById('testiName');
-  const vehicleEl = document.getElementById('testiVehicle');
-  const dots = Array.from(document.querySelectorAll('.tcarr-dot'));
-  let current = 0;
-  function go(next) {
-    current = ((next % testimonials.length) + testimonials.length) % testimonials.length;
-    card.classList.add('fading');
+  const vehEl = document.getElementById('testiVehicle');
+  const pills = Array.from(document.querySelectorAll('#testiPills .testi-pill'));
+  if (!txtEl || !pills.length) return;
+  let active = 0, animating = false;
+  function select(i){
+    if (i === active || animating) return;
+    animating = true;
+    txtEl.classList.add('swapping'); vehEl.classList.add('swapping');
+    pills[active].classList.remove('active'); pills[i].classList.add('active'); active = i;
     setTimeout(() => {
-      const t = testimonials[current];
-      txtEl.textContent = t.txt;
-      nameEl.textContent = t.name;
-      vehicleEl.textContent = t.vehicle;
-      dots.forEach((d, i) => d.classList.toggle('active', i === current));
-      card.classList.remove('fading');
-    }, 240);
+      txtEl.textContent = testimonials[i].txt;
+      vehEl.textContent = testimonials[i].vehicle;
+      txtEl.classList.remove('swapping'); vehEl.classList.remove('swapping');
+      setTimeout(() => { animating = false; }, 400);
+    }, 200);
   }
-  document.getElementById('testiNext')?.addEventListener('click', () => go(current + 1));
-  document.getElementById('testiPrev')?.addEventListener('click', () => go(current - 1));
-  dots.forEach((d, i) => d.addEventListener('click', () => go(i)));
+  pills.forEach((p, i) => p.addEventListener('click', () => select(i)));
 })();
 
 // ── Smooth anchor ───────────────────────────
@@ -2093,6 +2503,10 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     if (document.body.classList.contains('gate-unlocked')) return;
     document.body.classList.add('gate-unlocked');
     window.dispatchEvent(new Event('gate-unlock'));
+    // cross-fade the main layout in ~400ms into the camera fly-through
+    setTimeout(() => {
+      document.querySelector('.app-viewport-stage')?.classList.add('active');
+    }, 400);
     setTimeout(() => {
       document.querySelector('.main-header')?.classList.remove('gate-hidden');
     }, 2800);
@@ -2612,9 +3026,24 @@ else {
   requestAnimationFrame(fitStage);
   window.addEventListener('load', fitStage);
 
-  /* Stop rendering once gate is unlocked to save GPU */
+  /* Studio Reveal — fly the camera forward through the chassis, then unmount */
   window.addEventListener('gate-unlock', () => {
-    setTimeout(() => { running = false; renderer.dispose(); }, 2000);
+    const startPos = camera.position.clone();
+    const endPos = new THREE.Vector3(isMobile ? 0.6 : 0.9, 0.85, isMobile ? 1.7 : 1.5);
+    const dur = 1300, t0 = performance.now();
+    /* smootherstep — no jerk at either end, glides forward like silk */
+    const ease = x => x * x * x * (x * (x * 6 - 15) + 10);
+    (function fly(now) {
+      const p = Math.min(1, (now - t0) / dur);
+      camera.position.lerpVectors(startPos, endPos, ease(p));
+      camera.lookAt(camTarget);
+      if (p < 1 && running) requestAnimationFrame(fly);
+    })(performance.now());
+    /* unmount the 3D canvas only after the fly-through + cross-fade conclude */
+    setTimeout(() => {
+      running = false; renderer.dispose();
+      if (canvas) canvas.style.display = 'none';
+    }, 1400);
   });
 }
 </script>
